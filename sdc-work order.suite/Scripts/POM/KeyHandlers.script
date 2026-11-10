@@ -1,0 +1,258 @@
+﻿(** 
+@HandlerName: scrollTo -- Utilize this handler to scroll until the element is found, with a maximum of 10 iterations.
+@Params: toFind -- Element name which needs to identify
+@Params: SR  -- Pass the Search Rectangle where the element should appear.
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+
+to scrollTo toFind, SR:"webForm",scroll:"down",scrollSpeed:5
+	# if the search rectangle is passed as a key in Sections script, then use the value from Sections as SR
+	if SR is not a list then put Sections().SearchAreas.(SR) into SR
+	if file (suiteinfo().imagesFolder&"/"&toFind) exists then set text to "Image"		
+	repeat until imagefound(waitfor:0,(text):toFind,searchRectangle:SR,DPI:144,ignoreNewlines:on,ignoreSpaces:on)
+		if scroll is "down" then	
+			ScrollWheelDown scrollSpeed
+		else
+			ScrollWheelUp scrollSpeed
+		end if	
+		if repeatindex() > 20 then
+			Logerror "Cannot find"&&toFind
+			Exit repeat 
+		end if 
+		wait 3 
+	end repeat 
+	return foundimageinfo().imageRectangle 
+end scrollTo
+
+
+(**
+@HandlerName: clickElement -- Utilize this handler to click the element, In which scrolls until element present with a maximum of 9 iterations.
+@Params: label -- Element name to click
+@Params: SR  -- Pass the Search Rectangle where the element should appear.
+@Params: expectation --
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+to clickElement label,SR,SR2,expectation
+	if SR is not a list then put Sections().SearchAreas.(SR) into SR
+	if file (suiteinfo().imagesFolder&"/"&label) exists then set text to "Image"
+	// Click on the label passed. Use ScrollTo if the label is not found on screen 
+	click {waitfor:5,(text):label,ignoreNewlines:on, ignorespaces:on,searchRectangle:SR,dpi:144}
+	// Validate Element 
+	if expectation is not empty then validateValues expectation,SR2
+	wait 1 
+end clickElement 
+
+(**
+@HandlerName: textEntry -- Entrying the text which having the label inside the text box
+@Params: label -- Text where to entry
+@Params: SR  -- Pass the Search Rectangle where the element should appear.
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+to textEntry label,input,SR,offset:(Sections().offset().nullOffset)
+	click (Center of scrollTo(label,SR)+offset)
+	wait 1
+	TypeText controlkey,"a"
+	TypeText input 
+	wait 0.3
+end textEntry 
+
+(**
+@HandlerName: radioSelect -- clicking the radio button side to the label
+@Params: label -- label name which needs to identify
+@Params: SR  -- Pass the Search Rectangle where the element should appear.
+@Params: offset -- coordinates from the label
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+to radioSelect label,SR,offset:(Sections().offset().nullOffset)
+	click the CenterLeft of scrollTo(label,SR)+offset 
+	wait 0.5
+end radioSelect 
+
+
+(**
+@HandlerName: dropDown -- Utilize this handler to scroll until the element is found and click on dropdown, with a maximum of 10 iterations.
+@Params: label -- Element name which needs to identify
+@Params:input -- text that needs to entry in dropdown box
+@Params: SR  -- Pass the Search Rectangle where the element should appear.
+@Params:offset -- offset is the coodinates that needs to pass to click at the dropdown icon
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+to dropDown label,input:"",SR:Sections().SearchAreas.(webForm),offset:(Sections().offset().dropBoxOffset) 
+	//type Text homeKey
+	wait 1
+	put the Center of scrollTo(label,SR)+offset into label 
+	click label 
+	wait 2
+	//If the Search Rectangle is passed as a Key in Sections script, then use the value from Sections as SR
+	if SR is not a list then put Sections().SearchAreas.(SR) into SR
+	if input is not empty
+		repeat until imagefound(waitfor:0,text:input,searchRectangle:SR,ignoreNewlines:off,ignorespaces:on)
+			ScrollWheelDown 1
+			wait 1
+			if repeatindex() > 10 then
+				Logerror "Cannot find"&&toFind 
+				Exit repeat 
+			end if 
+		end repeat
+		click FoundImageLocation() 
+	end if 
+end dropDown
+
+(**
+@HandlerName: validateValues -- validating the multiple values or single value in the screen
+@Params: values -- Element name which needs to verify ( ex:- [a,b,c,d ....])
+@Params: SR  -- Pass the Search Rectangle where the element should appear.
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+on validateValues values,SR,pageWait:(Sections().explicitWait().maxWait) 
+	wait 0.5
+	//If the Search Rectangle is passed as a Key in Sections scrip,then use the value from Sections as SR
+	if SR is not a list then put Sections().SearchAreas.(SR) into SR
+	repeat for each item val in values 
+		if file (suiteinfo().imagesFolder&"/"&val) exists  then set text to "Image"  
+		wait 1 tick
+		assert that imagefound(waitfor:pageWait,(text):val,searchRectangle:SR,ignoreNewlines:on,ignorespaces:on,DpI:144) with val
+		log "Success : ( "&quote&val&quote&" is successfully displayed on the screen.)"
+	end repeat 
+	//take a screenshot
+	put "-------------------capturing screenshot for documentation purposes------------------"
+	replace every occurrence of <punctuation character> in item 1 of values with "_"
+	CaptureScreen {Name:suiteInfo().resultsFolder&slash&snaps&slash&item 1 of values && the hour && the minute }
+end validateValues 
+ 
+
+(**
+@HandlerName: generateSRForLabel -- 
+@Params: label -- Element name which needs to identify
+@Params: SR -- Pass the search Rectangle to form the rectangle as taking the label as base.
+@Params: SR2  -- Pass the Search Rectangle where the element should appear.
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+function generateSRForLabel label,SR,SR2:"webForm"
+	if SR is not a list then put Sections().SearchAreas.(SR) into SR
+	if SR2 is not a list then put Sections().SearchAreas.(SR2) into SR2
+	if file (suiteinfo().imagesFolder&"/"&label) exists then set text to "Image"   
+	put ImageRectangle((text):label,searchRectangle:SR2,ignoreNewlines:on,ignorespaces:on) into contentRect 
+	return contentRect + SR
+end generateSRForLabel 
+
+
+(**
+@HandlerName: readField -- 
+@Params: label -- Element name which needs to identify
+@Params: offset -- 
+@Params: SR  -- Pass the Search Rectangle where the element should appear.
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+function readField label,offset,SR
+	// Read near text label based on offset 
+	if number of items of offset is 4 then 
+		put ReadText(scrollTo(label,SR)+offset) into readValue 
+	else
+		put ReadText(CenterLeft of scrollTo(label,SR)+offset) into readValue
+	end if
+	return readValue 
+end readField 
+
+
+(**
+@HandlerName: validateField -- 
+@Params: label -- Element name which needs to identify
+@Params: expected --
+@Params: offset -- 
+@Params: SR  -- Pass the Search Rectangle where the element should appear.
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+to validateField label,expected,offset,SR:Sections().SearchAreas.(webForm),operand:"Contains"
+	put readField(label,offset,SR) into actual 
+	if operand is ...
+		..."Contains":
+			if expected is empty 
+				assert that actual is empty with label&&"is empty"
+			else 
+				assert that actual contains expected with label&&"contains "&&expected
+			end if 
+		... "Equals":
+			assert that actual equals expected with label&&"equals"&&expected 
+		... "Not Equal":
+			assert that actual not equal expected with label&&"not equal"&&expected 
+	end if 
+end validateField 
+
+(**
+@HandlerName: clickInsideElement -- 
+@Params: label -- Element name which needs to identify
+@Params: SR  -- Pass the Search Rectangle where the element should appear.
+@Params: offset --
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+to clickInsideElement label,SR,offset:Sections().offset.("textBoxOffset")
+	// Click inside the label passed. Use ScrollTo if the label is not found on screen 
+	if label is not empty 
+		click the center of scrollTo(label,SR)+offset
+	end if 
+	moveto[1400,500]
+	wait 1 
+end clickInsideElement 
+
+(**
+@HandlerName: webPageLoad -- 
+@Params: pageWait --
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+to webPageLoad pageWait:(Sections().explicitWait().maxWait)
+	wait 1
+	try
+		assert that imagefound(image:"browser/refreshButton",searchRectangle:Sections().SearchAreas.("browserRefresh"),Waitfor:pageWait) with "browser/refreshButton"
+		log "Success: Browser refresh completed successfully."
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end webPageLoad
+
+
+(**
+@HandlerName: enterTextOrOperations -- 
+@Params: textToEnter
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+to enterText
+	params input, input2:"",returnType:"No"
+	typetext input,input2
+	if returnType is "Yes" then typetext return
+end enterText
+
+to runDialog
+	TypeText windowsKey, "r"
+	validateValues "Run","runWindow"
+end runDialog
+
+to mouseActionOnPreferredElement label,SR:"webForm",itemNumber:1,mouseAction:Click
+	if SR is not a list then put Sections().SearchAreas.(SR) into SR
+	if file (suiteinfo().imagesFolder&"/"&label) exists  then set text to "Image" 
+	do mouseAction&&item itemNumber of EveryImageLocation((text):label,searchRectangle:SR,ignoreNewlines:on,ignorespaces:on,DPI:144)
+end mouseActionOnPreferredElement

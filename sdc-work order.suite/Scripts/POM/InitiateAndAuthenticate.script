@@ -1,0 +1,209 @@
+﻿(****
+COMMONLY USED LINES IN FRAMEWORK :-
+the TextStyle : This function is used to configure properties for Optical Character Recognition (OCR) when the default settings struggle to accurately identify text.
+ErrorMessageCustomization.captureScreenAndNotifyError theException : This handler captures any exceptions that occur when the script fails, providing a user-friendly error message in the console and taking a snap of the failure.
+Params : This refers to the parameters or arguments that are passed to a function or script to customize its behavior or input data. These parameters allow users to specify different values or configurations for the automation tasks, enabling more flexible and reusable scripts
+****)
+
+(*
+This Handler helps to read User Profiles and TAT Paused data from the excel
+*)
+to readUserProfilesAndHoldReason
+	params loginUserDetails,onHoldReason
+	set fileName = "C:\SDC_VOSCAL\SDC WO Data File.xlsx"
+	if loginUserDetails is not empty then set universal userProfiles to (the records of {type: "excel",file:fileName,name:"User Profiles",writable:"Yes"} where "Profile Name" is loginUserDetails)
+	if onHoldReason is not empty then set universal TATPauseData to (the records of {type: "excel",file:fileName,name:"TAT Pause data",writable:"Yes"} where "On Hold Reasons" is onHoldReason)
+end readUserProfilesAndHoldReason
+
+(*
+This Handler helps to read the test data from the excel
+*)
+to readTestData
+	(**.xlsx reading format**)
+	set fileName = "C:\SDC_VOSCAL\SDC WO Data File.xlsx"
+	set universal WOData to item 1 of (the records of {type: "excel",file:fileName,name:"SDC_WO_TestData",writable:"Yes"})
+end readTestData
+
+(*
+This Handler helps to launch the Salesforce Application
+*)
+to launchSalesforce
+	params loginUserDetails,onHoldReason
+	try
+		readTestData 
+		readUserProfilesAndHoldReason loginUserDetails,onHoldReason
+		repeat 3 times
+			click [300,300]
+			typetext controlKey,w
+		end repeat
+		KeyHandlers.runDialog
+		TypeText "chrome",return
+		KeyHandlers.webPageLoad
+		click [300,300]
+		typetext windowsKey,upArrow
+		cleanupHistoryCache
+		TypeText controlKey,"l"
+		TypeText universal WOData.SFAppUrl,return
+		KeyHandlers.webPageLoad
+		KeyHandlers.validateValues "sales force","webForm"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end launchSalesforce
+
+(*
+This Handler helps to login into the Saesforce Application
+*)
+to loginToSandbox
+	try
+		KeyHandlers.textEntry "Username",universal userProfiles.Username,,Sections().offset.("loginTextBoxOffset")
+		KeyHandlers.textEntry "Password",universal userProfiles.Password,,Sections().offset.("loginTextBoxOffset")
+		KeyHandlers.clickElement "Log In to Sandbox"
+		KeyHandlers.webPageLoad
+		try
+			#
+			KeyHandlers.validateValues "Change Your Password"
+			KeyHandlers.scrollTo "Cancel","bottomHalf",,10
+			KeyHandlers.clickElement "Cancel"
+			KeyHandlers.webPageLoad
+			KeyHandlers.validateValues "Switch to Lightning Experience","headerSection",5
+			KeyHandlers.clickElement "Switch to Lightning Experience","headerSection"
+		end try
+		KeyHandlers.webPageLoad
+		KeyHandlers.validateValues "Log out"
+		try
+			wait 2
+			#Closing all the Open tabs in the Application
+			KeyHandlers.clickElement "Services Delivery","leftHalf"
+			typetext shiftKey,w
+			KeyHandlers.validateValues "Close All","Center",10
+			KeyHandlers.clickElement "Close All","KeyHandlers".generateSRForLabel("pinned tabs stay open",Sections().searchAreas.("topHalf"))
+		end try
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end loginToSandbox
+
+(*
+This Handler helps to clear the Cache In the Chrome
+*)
+to cleanupHistoryCache
+	try
+		TypeText controlKey,shiftKey,deleteKey
+		KeyHandlers.validateValues "Delete data","bottomHalf",30
+		KeyHandlers.clickElement "Delete data","bottomHalf"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end cleanupHistoryCache
+
+to logonLegalNotice
+	try
+		wait 5
+		if ConnectionInfo().Status is "Connected" then
+			try
+				KeyHandlers.validateValues "Logon Legal Notice"
+				KeyHandlers.clickElement "OK","KeyHandlers".generateSRForLabel("Logon Legal Notice",Sections().searchAreas.("headerSection"))
+			catch
+				typetext enterKey
+			end try
+		else
+			typetext enterKey
+		end if
+		KeyHandlers.validateValues "Type here to search","runWindow"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end logonLegalNotice
+
+(*
+This Handler helps to get the number Without Commas
+*)
+function getNumberWithoutComma
+	Params number
+	delete every occurrence of comma in number 
+	return number
+end getNumberWithoutComma
+
+(*
+This Handler helps to get number in the form of Indian Number System
+*)
+function getIndianNumberSystem
+	Params number
+	if number contains "." then 
+		split number by "."
+		put "."&(item 2 of number) into decimalNumbers
+		put item 1 of number into number
+	else
+		put "" into decimalNumbers
+	end if
+	
+	if length(number) <= 3 then
+		return number
+	else
+		put the last 3 characters of number into formattedNumber1
+		put the first (length(number)-3) characters of number into formattedNumber2
+		return formattedNumber2&comma&formattedNumber1&decimalNumbers
+	end if
+	
+	(*put length(number) into numberLength
+		if numberLength <= 3 then
+		return number
+	end if
+	put char (numberLength-2) to numberLength of number into formattedNumber
+	put char 1 to (numberLength-3) of number into remainingNum
+	repeat while length(remainingNum) > 2
+		put char -2 to -1 of remainingNum & "," before formattedNumber
+		delete last 2 characters of remainingNum
+	end repeat
+	if remainingNum is not empty then
+		put remainingNum & "," before formattedNumber
+	end if
+	return formattedNumber&(decimalNumbers)*)
+end getIndianNumberSystem
+(*
+This Handler helps to refresh the Browser
+*)
+to refreshBrowser
+	try
+		KeyHandlers.clickElement  "browser/refreshButton","browserRefresh"
+		wait 2
+		KeyHandlers.webPageLoad
+		typetext homeKey
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end refreshBrowser
+(*
+This handler helps to Delete all the Downloads From the File Manager
+*)
+to deleteAllDownloads
+	try
+		typetext windowsKey,e
+		KeyHandlers.validateValues "Quick Access",,5
+		KeyHandlers.clickElement "Quick Access"
+		typetext windowsKey,upArrow
+		wait 2
+		KeyHandlers.clickElement "Downloads",KeyHandlers.generateSRForLabel("Home",[-100,10,100,500],"topLeftQuadrant")
+		TypeText controlKey,a
+		wait 10 ticks
+		typetext deleteKey
+		wait 10 ticks
+		KeyHandlers.clickElement "Quick Access"
+		TypeText altKey,f,c
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end deleteAllDownloads
+(*
+This Function helps to get the url
+*)
+function getURL
+	try
+		typetext controlKey,l
+		typetext controlKey,c
+		return RemoteClipboard()
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end getURL

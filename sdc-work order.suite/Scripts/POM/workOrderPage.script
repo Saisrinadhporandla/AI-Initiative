@@ -1,0 +1,1302 @@
+﻿(****
+COMMONLY USED LINES IN FRAMEWORK :-
+the TextStyle : This function is used to configure properties for Optical Character Recognition (OCR) when the default settings struggle to accurately identify text.
+ErrorMessageCustomization.captureScreenAndNotifyError theException : This handler captures any exceptions that occur when the script fails, providing a user-friendly error message in the console and taking a snap of the failure.
+Params : This refers to the parameters or arguments that are passed to a function or script to customize its behavior or input data. These parameters allow users to specify different values or configurations for the automation tasks, enabling more flexible and reusable scripts
+****)
+
+(*
+This Handler helps to create the New WorkOrder
+*)
+to createWorkOrder
+	try
+		KeyHandlers.validateValues "Bulk Work Order Create","headerSection"
+		KeyHandlers.clickElement "New","headerSection"
+		KeyHandlers.validateValues "New Work Order","headerSection"
+		wait 3
+		KeyHandlers.clickElement "Search Assets","leftPanel"
+		#Enter the Asset Name in the Asset Label
+		KeyHandlers.enterText "EggplantRegressionTest"
+		wait 2
+		KeyHandlers.clickElement "EggplantRegressionTestAsset","leftPanel"
+		#selecting the Value from the dropDown
+		KeyHandlers.dropDown "Business Unit","MSD",KeyHandlers.generateSRForLabel("Business Unit","topHalf","leftPanel"),(Sections().offset().nullOffset)
+		KeyHandlers.clickElement "Business Unit","leftPanel"
+		KeyHandlers.dropDown "Sales Group","MSD",KeyHandlers.generateSRForLabel("Sales Group","topHalf","leftPanel"),(Sections().offset().nullOffset)
+		KeyHandlers.dropDown "Bill To Contact","Gopi Krishna",KeyHandlers.generateSRForLabel("Bill To Contact","topHalf","leftPanel"),[0,15]
+		KeyHandlers.dropDown "Ship To Contact","Gopi Krishna",KeyHandlers.generateSRForLabel("Ship To Contact","topHalf","leftPanel"),[0,15]
+		KeyHandlers.scrollTo "Expected Pick Up Date","leftHalf",,2
+		set the TextStyle to {DPI:144}
+		(*		KeyHandlers.textEntry  "Service Bundle","Repair On","leftPanel",[150,0]
+		KeyHandlers.mouseActionOnPreferredElement "Repair Only","leftPanel",2*)
+		KeyHandlers.validateValues "Repair Only",KeyHandlers.generateSRForLabel("Service Bundle","topHalf","leftPanel")
+		KeyHandlers.scrollTo "Choose Entitlement","leftHalf",,2
+		KeyHandlers.dropDown "Expected Pick Up","Today",KeyHandlers.generateSRForLabel("Expected Pick Up","topHalf","leftPanel"),(Sections().offset().nullOffset)
+		wait 2
+		KeyHandlers.clickElement "Expected Receipt","leftPanel"
+		KeyHandlers.clickElement "Receiving Method","leftPanel"
+		KeyHandlers.clickElement "Keysight Arrange Pickup","leftPanel"
+		KeyHandlers.scrollTo "Trade","bottomHalf"
+		KeyHandlers.validateValues "Warranty Entitlements","leftHalf"
+		KeyHandlers.radioSelect "workOrder/icons/radioButton",KeyHandlers.generateSRForLabel("Trade",[-500,-20,1000,20],"leftPanel")
+		KeyHandlers.scrollTo "Save","bottomHalf"
+		#Validating the Asset Serive Note in the Accepted State or not
+		KeyHandlers.validateValues "Accepted",KeyHandlers.generateSRForLabel("Asset Service Note","topHalf","leftPanel")
+		KeyHandlers.clickElement "Save","bottomHalf"
+		log "Work Order Created"
+		wait 20
+		try
+			KeyHandlers.validateValues "Work Order Number","leftPanel",15
+		catch
+			KeyHandlers.clickElement "Work Order",KeyHandlers.generateSRForLabel("Work Order",[-10,20,500,500],"bottomHalf")
+			KeyHandlers.validateValues "Work Order Number","leftPanel"
+		end try
+		#Reading the Work Order Number and URL into Excel
+		"POM/InitiateAndAuthenticate".readTestData
+		put KeyHandlers.readField("Work Order Number",[150,10],"leftPanel") into universal WOData.workOrder
+		log "Work Order Created : "&universal WOData.workOrder
+		put "POM/InitiateAndAuthenticate".getURL  into universal WOData.workOrderURL
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end createWorkOrder
+
+(*
+This Handler helps to navigate to the Work Order from module DropDown
+*)
+to navigateToWorkOrders
+	try
+		"POM/LandingPage".navigateToSDCModule "Work Orders"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end navigateToWorkOrders
+
+(*
+This handler helps to check whether the On HOld Reason in Wait For Customer PO  or not
+*)
+to checkWaitForCustomerPO
+	try
+		KeyHandlers.validateValues "Complete",(KeyHandlers.generateSRForLabel("Work Order Service","topHalf","rightPanel"))
+		removeGTMHold
+		"POM/WOHandlers".checkAndStoreOnHoldReasonAndTime "customer PO"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end checkWaitForCustomerPO
+
+(*
+this handler helps to add data into ACCAuth label
+*)
+to setAcctAuthToClearHoldReason
+	try
+		"POM/WOHandlers".	collapseAllLightningArrows
+		KeyHandlers.scrollTo "Financial Details","leftPanel",,3
+		try
+			KeyHandlers.validateValues "Acct Auth","leftPanel",5
+		catch
+			#Click on the Financial Details Tab
+			KeyHandlers.clickElement "Financial Details","leftPanel"
+		end try
+		KeyHandlers.scrollTo "Acct Auth","leftPanel",,3
+		KeyHandlers.mouseActionOnPreferredElement "Acct Auth","leftPanel",,DoubleClick
+		wait 2 ticks
+		KeyHandlers.enterText "Test234567"
+		wait 2
+		KeyHandlers.clickElement "Save","bottomHalf"
+		wait 5
+		"POM/InitiateAndAuthenticate".refreshBrowser
+		try
+			KeyHandlers.validateValues "Work Order Number","leftPanel",5
+		catch
+			KeyHandlers.clickElement "Work Order",KeyHandlers.generateSRForLabel("Work Order",[-10,20,500,500],"bottomHalf")
+		end try
+		KeyHandlers.validateValues "On Hold Reason","leftpanel"
+		#validating the On HOld Reason is empty or not
+		KeyHandlers.validateField "On Hold Reason","",[150,0],"leftPanel"
+		"POM/WOHandlers".navigateSalesforceInspector
+		KeyHandlers.textEntry "Filter","TAT Paused","headerSection"
+		#checking the tat paused value 
+		KeyHandlers.validateValues "False"
+		KeyHandlers.validateField "Value","False",[1,20],"headerSection"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end setAcctAuthToClearHoldReason
+
+(*
+This Handler helps to validate the tat paused value for the Wait For customer PO
+*)
+to validateTATPausedValueForWaitforCustomerPO
+	try
+		"POM/WOHandlers".navigateSalesforceInspector
+		KeyHandlers.textEntry "Filter","TAT Paused","headerSection"
+		put KeyHandlers.readField("Value",[1,20],"HeaderSection") into TATPausedValue
+		put KeyHandlers.readField("Value",[1,40],"HeaderSection") into TATPausedTime
+		KeyHandlers.validateValues ["Value"]
+		"POM/InitiateAndAuthenticate".readUserProfilesAndHoldReason "","Wait for customer PO"
+		KeyHandlers.validateField "Value",universal TATPauseData."tat pause value",[1,20],"headerSection"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end validateTATPausedValueForWaitforCustomerPO
+
+(*
+This Handler helps to validate the Onhold Time for the wait for Customer PO On hold Reason
+*)
+to validateOnHoldTimeDifferenceForWaitCustomerPO
+	try
+		"POM/WOHandlers".navigateToScheduling
+		wait 1
+		KeyHandlers.scrollTo "On Hold Time","leftPanel",,2
+		put KeyHandlers.readField("On Hold Time",[110,0],"leftPanel") into onHoldTime
+		#Checking that their is a change in the OnHold Time or not
+		assert that universal onHoldTime is not equal to onHoldTime with "Difference in time : "&(onHoldTime-universal onHoldTime)
+		log "On Hold Time difference : "&(onHoldTime-universal onHoldTime)
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end validateOnHoldTimeDifferenceForWaitCustomerPO
+
+(*
+This Handler helps to Navigate to the TestSnote Work Order Service
+*)
+to navigateToTestSNote
+	try
+		#By clicking on the TestsNote we navigate to TestSNote WOS
+		KeyHandlers.clickElement "TestSNote",(KeyHandlers.generateSRForLabel("Work Order Service",[-30,-30,600,300],"rightPanel"))
+		KeyHandlers.validateValues "Work Order Service"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end navigateToTestSNote
+
+(*
+This Handler helps to add Needs Resolution to On Hold Reason
+*)
+to fillDetailsInNeedsResolution
+	try
+		KeyHandlers.validateValues "Needs Resolution","rightHalf"
+		KeyHandlers.clickElement "Needs Resolution","rightHalf"
+		#Filling Details in The Needs Resolution Pop-up
+		KeyHandlers.validateValues "Needs Resolution","center"
+		KeyHandlers.enterText "Test"
+		KeyHandlers.clickElement "Details","center"
+		KeyHandlers.scrollTo "Save","center"
+		KeyHandlers.clickElement "Save","center"
+		try
+			set the TextStyle to {DPI:144}
+			KeyHandlers.validateValues "added","headerSection",10
+		end try
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end fillDetailsInNeedsResolution
+
+(*
+This Handlers helps to check The On HOld Reason is updatd with needs Resolution 
+and navigating to Salesforce inspector to check its tata paused value
+*)
+to checkNeedsResolutionAndValidateInInspector
+	try
+		wait 2
+		"POM/WOHandlers".checkAndStoreOnHoldReasonAndTime "Needs Resolution"
+		"POM/WOHandlers".navigateSalesforceInspector
+		KeyHandlers.textEntry "Filter","TAT Paused","headerSection"
+		put KeyHandlers.readField("Value",[1,20],"HeaderSection") into TATPausedValue
+		put KeyHandlers.readField("Value",[1,40],"HeaderSection") into TATPausedTime
+		KeyHandlers.validateValues ["Value"]
+		"POM/InitiateAndAuthenticate".readUserProfilesAndHoldReason "","Needs Resolution"
+		KeyHandlers.validateField "Value",universal TATPauseData."tat pause value",[1,20],"headerSection"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end checkNeedsResolutionAndValidateInInspector
+
+(*
+This Handler helps to remove the Needs Resolution  
+*)
+to clearNeedsResolution
+	try
+		KeyHandlers.clickElement "Activity","leftPanel"
+		set the TextStyle to {DPI:250}
+		KeyHandlers.validateValues "Work Order - Needs Resolution","leftPanel"
+		set the TextStyle to {DPI:250}
+		KeyHandlers.clickInsideElement "Work Order - Needs Resolution","leftPanel",[-115,0]
+		set the TextStyle to {DPI:72}
+		wait 3
+		CaptureScreen {Name:suiteInfo().resultsFolder&slash&snaps&slash&"ClearNeedsResolution" && the hour && the minute }
+		"POM/InitiateAndAuthenticate".refreshBrowser
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end clearNeedsResolution
+
+(*
+This Handler helps to check the On Hold Time for the Needs Resolution
+*)
+to validateOnHoldTimeDifferenceForNeedsResolution
+	try
+		"POM/WOHandlers".navigateToScheduling
+		KeyHandlers.scrollTo "On Hold Time","leftPanel",,2
+		put KeyHandlers.readField("On Hold Time",[110,0],"leftPanel") into onHoldTime
+		assert that universal onHoldTime is  onHoldTime with "Not change in time"
+		log "On Hold Time difference : "&(onHoldTime-universal onHoldTime)
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end validateOnHoldTimeDifferenceForNeedsResolution
+
+(*
+This Handler helps to change the On Hold Resson To Admin Hold
+*)
+to changeHoldReasonToAdminHold
+	try
+		"POM/WOHandlers".	addOnHoldReason "Admin Hold"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end changeHoldReasonToAdminHold
+
+(*
+This Handler helps to check the On hold Reason and navigate to Salesforce inspector
+*)
+to checkAdminHoldAndValidateInInspector
+	try
+		"POM/WOHandlers".checkAndStoreOnHoldReasonAndTime "Admin Hold"
+		"POM/WOHandlers".navigateSalesforceInspector
+		KeyHandlers.textEntry "Filter","TAT Paused","headerSection"
+		put KeyHandlers.readField("Value",[1,20],"HeaderSection") into TATPausedValue
+		put KeyHandlers.readField("Value",[1,40],"HeaderSection") into TATPausedTime
+		KeyHandlers.validateValues ["Value"]
+		"POM/InitiateAndAuthenticate".readUserProfilesAndHoldReason "","Admin Hold"
+		KeyHandlers.validateField "Value",universal TATPauseData."tat pause value",[1,20],"headerSection"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end checkAdminHoldAndValidateInInspector
+
+(*
+This Hanlder helps to Remove te Admin Hold from on Hold reason
+*)
+to removeHoldReasonToAdminHold
+	try
+		KeyHandlers.clickElement "Activity","leftPanel"
+		set the TextStyle to {DPI:144}
+		KeyHandlers.validateValues "Work Order - Admin Hold","leftPanel"
+		KeyHandlers.clickInsideElement "Work Order - Admin Hold","leftPanel",[-100,0]
+		set the TextStyle to {DPI:72}
+		"POM/InitiateAndAuthenticate".refreshBrowser
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end removeHoldReasonToAdminHold
+(*
+This Handler helps to check the OnHoldTime Difference for Admin Hold
+*)
+to validateOnHoldTimeDifferenceAdminHold 
+	try
+		"POM/WOHandlers".navigateToScheduling		
+		KeyHandlers.scrollTo "On Hold Time","leftPanel",,2
+		put KeyHandlers.readField("On Hold Time",[110,0],"leftPanel") into onHoldTime
+		assert that universal onHoldTime is not equal to onHoldTime with "Difference in time : "&(onHoldTime-universal onHoldTime)
+		log "On Hold Time difference : "&(onHoldTime-universal onHoldTime)
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end validateOnHoldTimeDifferenceAdminHold
+
+(*
+This Handler helps to open the Work Order
+Prams workOrder:Passing the Work Order Number from Excel
+Params workOrderURL:Passing the Work order URL link from Excel
+*)
+to openWorkorder
+	params workOrderURL :universal WOData.workOrderURL, workOrder: universal WOData.workOrder
+	try
+		TypeText controlKey,l
+		TypeText workOrderURL,returnKey
+		KeyHandlers.webPageLoad
+		KeyHandlers.validateValues workOrder,"leftHalf"
+		#close all the Lighting Arrows
+		"POM/WOHandlers".collapseAllLightningArrows
+		wait 3
+		KeyHandlers.clickElement "Work Order",KeyHandlers.generateSRForLabel("Activity",[-200,20,500,500],"bottomHalf")
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end openWorkorder
+
+(*
+This Handler helps to fill the Necessary fields After Clicking On the Receiving Button in the Work order Page
+*)
+to performReceiving
+	try
+		KeyHandlers.validateValues "Receiving","topHalf"
+		KeyHandlers.clickElement "Receiving","topHalf"
+		#After Clicking the Receiving Pop-up will Appear
+		set the TextStyle to {contrast:"On", contrastColor:"#2E91DC", contrastTolerance:"49"}
+		KeyHandlers.validateValues "Receive","bottomHalf"
+		set the TextStyle = ""
+		KeyHandlers.clickElement "Asset Options","verticalMiddle"
+		KeyHandlers.textEntry "Country","NA","verticalMiddle"
+		KeyHandlers.scrollTo "Accessories","verticalMiddle",,2
+		KeyHandlers.mouseActionOnPreferredElement "Accessories","verticalMiddle",2
+		KeyHandlers.enterText "test"
+		KeyHandlers.scrollTo "Receiving Safety Test Result","verticalMiddle",,2
+		KeyHandlers.dropDown "None","Passed",KeyHandlers.generateSRForLabel("Receiving Safety Test Result","topHalf","leftPanel"),(Sections().offset().nullOffset)
+		KeyHandlers.scrollTo "Visual Inspection","verticalMiddle"
+		KeyHandlers.dropDown "None","Passed",KeyHandlers.generateSRForLabel("Visual Inspection","topHalf","leftPanel"),(Sections().offset().nullOffset)
+		wait 2
+		KeyHandlers.textEntry "None","FedEX"
+		wait 1
+		KeyHandlers.textEntry "Tracking Number","TECRF345","verticalMiddle"
+		KeyHandlers.clickElement "Receive","footerSection"
+		try 
+			KeyHandlers.validateValues "Success","headerSection"
+		end try
+		openWorkorder
+		KeyHandlers.validateField "Status","In Progress",[100,0],"bottomHalf"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try		
+end performReceiving
+
+(*
+This Handler helps to Add Work Order Service
+*)
+to manageServices
+	try	
+		KeyHandlers.validateValues "Work Order Service","rightPanel"
+		#Click on the Manage Services
+		KeyHandlers.clickElement "Manage Services","rightPanel"
+		KeyHandlers.validateValues "SERVICE TYPE","leftHalf"
+		KeyHandlers.clickElement "Calibration/Test/Verification","leftHalf"
+		KeyHandlers.clickInsideElement  "Calibration",KeyHandlers.generateSRForLabel("Accredited Calibration",[-70,20,500,500]),[-110,0]
+		try
+			KeyHandlers.validateValues "Added to Deliverable Service","headerSection",1
+		End try	
+		KeyHandlers.clickInsideElement "Calibration UMU","Center",[-110,0]
+		try
+			KeyHandlers.validateValues "Added to Deliverable Service","headerSection",1
+		End try	
+		KeyHandlers.clickElement "Repair","topHalf"
+		KeyHandlers.clickInsideElement "Technical Evaluation","Center",[-120,0]
+		try
+			KeyHandlers.validateValues "Added to Deliverable Service","headerSection",1
+		End try	
+		KeyHandlers.scrollTo "Save","footerSection"
+		#validating the Added Work Order Services
+		set the SearchRectangle to KeyHandlers.generateSRForLabel("Work Order Service Name","topHalf","bottomHalf")
+		KeyHandlers.validateValues ["Logistics (Inbound)","TestSNote","Repair","Calibration"], the SearchRectangle
+		KeyHandlers.clickElement "Repair", the SearchRectangle
+		KeyHandlers.scrollTo "Technical Evaluation", the SearchRectangle
+		KeyHandlers.validateValues ["Calibration UMU"], the SearchRectangle
+		log "successfully added calibration,calibration UMU and technical Evaluation"
+		KeyHandlers.clickElement "Save","footerSection"
+		try 
+			KeyHandlers.validateValues "manual","headerSection"
+		end try
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end manageServices
+
+(*
+This Handler helps to remove the Technical Evalution WOS
+*)
+to removeTechnicalEvaluation
+	try
+		KeyHandlers.validateValues "Work Order Service","rightPanel"
+		KeyHandlers.clickElement "workOrder/icons/moduleDropdown",KeyHandlers.generateSRForLabel("Technical","topHalf","rightPanel")
+		KeyHandlers.mouseActionOnPreferredElement "Delete","rightPanel"
+		KeyHandlers.validateValues "Delete Work Order Service","Center"
+		KeyHandlers.clickElement "Delete",(KeyHandlers.generateSRForLabel("Cancel","leftHalf","bottomHalf"))
+		try
+			set the TextStyle to {DPI:144}
+			KeyHandlers.validateValues "deleted","headerSection",10
+		end try
+		log "Deleted Technical Evaluation"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end removeTechnicalEvaluation
+
+(*
+This Handler Helps to navigate to Particular Work Order Services
+Params:Pass the Required WOs
+*)
+to navigateToParticularWorkOrderService
+	Params WOSName:"Repair"
+	try
+		set the SearchRectangle to KeyHandlers.generateSRForLabel("Work Order Service Name","topHalf","rightPanel")
+		KeyHandlers.clickElement WOSName, the SearchRectangle
+		KeyHandlers.validateValues "Ship To Address","leftPanel"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end navigateToParticularWorkOrderService
+
+(*
+This Hnalder helps to identify Errors After Clicking On the Complete in the WOS
+*)
+to validateErrorDiagnoisesQuoteDetailsQuoteAcceptance
+	try
+		KeyHandlers.clickElement "Complete","rightHalf"
+		KeyHandlers.clickElement "Mark as Current Status","rightHalf"
+		set the TextStyle to {DPI:144}
+		KeyHandlers.validateValues "You encountered some errors when trying to save this record","headerSection"
+		--KeyHandlers.validateValues "You encountered some errors when trying to save this record Quote Details: Please provide Quote Details. Diagnosis: Diagnosis can not be empty. Quoted Acceptance: Please select Quoted Acceptance. Action Taken: Please make sure you have provided value for"&&quote&"Action Taken"&quote&&"Service Report: Please make sure you have provided value for"&&quote& "Service Report"&quote&&"Status: The Work Order is currently On Hold, therefore you can not progress this Service until this has been resolved","headerSection"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end validateErrorDiagnoisesQuoteDetailsQuoteAcceptance
+
+(*
+This Handler helps to fill Work Order Labour(WOL) hours and Work order Quoted Labour(WOQL) hours
+*)
+to fillHoursForWOLAndWOQL
+	try
+		KeyHandlers.validateValues "To Do","leftPanel"
+		wait 3
+		set the TextStyle to {DPI:144}
+		set the SearchRectangle to KeyHandlers.generateSRForLabel("Work Order Labours","topHalf","rightPanel")
+		KeyHandlers.mouseActionOnPreferredElement "Repair",the SearchRectangle,,DoubleClick
+		wait 2
+		KeyHandlers.textEntry "Repair",6,the SearchRectangle,[250,0]
+		KeyHandlers.clickElement "Save",the SearchRectangle
+		wait 2
+		set the TextStyle to {DPI:144}
+		set the SearchRectangle to KeyHandlers.generateSRForLabel("Work Order Quoted Labours","topHalf","rightPanel")
+		KeyHandlers.mouseActionOnPreferredElement "Repair",the SearchRectangle,,DoubleClick
+		wait 1
+		KeyHandlers.textEntry "Repair",16,the SearchRectangle,[300,0]
+		KeyHandlers.clickElement "Save",the SearchRectangle
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end fillHoursForWOLAndWOQL
+
+to performAndCompleteServiceNoteService
+	removeGTMHold
+	KeyHandlers.scrollTo "Ship To Service Account","leftHalf",UP
+	fillTestSNoteWOS "TestSNote"
+	fillWOLHours
+	WOSChangedTOComplete
+end performAndCompleteServiceNoteService
+
+(*
+This Handler helps to fill the Diagnosis Data in the TestSNote WOS
+*)
+to fillTestSNoteWOS
+	Params WOS:"Repair"
+	try
+		navigateToParticularWorkOrderService WOS
+		#Double Click on the Diagnosi To enble the field and enter required Data
+		KeyHandlers.mouseActionOnPreferredElement "Diagnosis","leftPanel",,DoubleClick 
+		KeyHandlers.clickElement "Diagnosis","leftPanel"
+		KeyHandlers.enterText "test"
+		KeyHandlers.scrollTo "Quote Details","leftPanel",,2
+		KeyHandlers.clickElement "Quote Details","leftPanel"
+		KeyHandlers.enterText "test"
+		KeyHandlers.scrollTo "Service Report","leftPanel",,2
+		KeyHandlers.clickElement "Service Report","leftPanel"
+		KeyHandlers.enterText "test"
+		KeyHandlers.scrollTo "Notes To Division","leftPanel",,2
+		KeyHandlers.clickElement "Action Taken","leftPanel"
+		KeyHandlers.enterText "test"
+		try
+			KeyHandlers.validateValues "Cause Code","leftPanel",5
+			KeyHandlers.clickElement "Cause Code","leftPanel"
+			KeyHandlers.clickElement "Workmanship","leftPanel"
+		end try
+		KeyHandlers.scrollTo "Quoted Acceptance","leftPanel",,2
+		wait 1
+		KeyHandlers.validateField  "Quoted Acceptance","Accept",[150,0],"leftPanel"
+		set the TextStyle to {DPI:144}
+		KeyHandlers.clickElement "Save",KeyHandlers.generateSRForLabel("Cancel","topHalf","leftHalf")
+		KFeyHandlers.scrollTo "Ship To Address","topHalf","up"
+		wait 2
+		#Copying the WOS URL 
+		TypeText controlKey,l
+		TypeText controlKey,c
+		#Clicking on the in Progress to change its state
+		KeyHandlers.clickElement "In Progress","horizontalMiddle"
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		try
+			set the TextStyle to {DPI:144}
+			KeyHandlers.validateValues "Status changed successfully","headerSection",2
+			KeyHandlers.validateValues "You encountered some errors","headerSection",2
+		end try	
+		KeyHandlers.validateValues "Status changed successfully","headerSection",5
+		
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end fillTestSNoteWOS
+
+(*
+This Handler helps to fill the WOL hours
+*)
+to fillWOLHours 
+	try
+		KeyHandlers.validateValues "Work Order Labours",KeyHandlers.generateSRForLabel("Work Order Parts","topHalf","rightPanel")
+		KeyHandlers.clickElement "New",KeyHandlers.generateSRForLabel("Work Order Parts","topHalf","rightPanel")
+		KeyHandlers.validateValues "New Work order Labour","verticalMiddle"
+		KeyHandlers.clickElement "Date","verticalMiddle"
+		KeyHandlers.clickElement "Today","verticalMiddle"
+		wait 2
+		KeyHandlers.clickElement "Hours","verticalMiddle"
+		KeyHandlers.clickElement "Hours","verticalMiddle"
+		KeyHandlers.enterText "4"
+		KeyHandlers.clickElement "Labour Type","leftHalf"
+		KeyHandlers.clickElement "Standard Time","leftHalf"
+		KeyHandlers.clickElement "Activity","leftHalf"
+		KeyHandlers.clickElement "Calibration","leftHalf"
+		KeyHandlers.clickElement "Save","rightHalf"
+		try
+			KeyHandlers.validateValues "Work Order Labour","headerSection"
+		end try
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end fillWOLHours
+
+(*
+This Handler help to Complete The TestSNote WOS
+*)
+to WOSChangedTOComplete
+	try
+		TypeText controlKey,"l"
+		TypeText RemoteClipboard(),returnKey
+		KeyHandlers.validateValues "Complete","rightPanel"
+		KeyHandlers.clickElement "Complete","rightPanel"
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		try 
+			KeyHandlers.validateValues "Status Changed Successfully","headersection"
+		end try	
+		KeyHandlers.webPageLoad 
+		put KeyHandlers.readField ("Status",[150,0],"leftPanel") into status
+		log "Status changed to "&&status 
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end WOSChangedTOComplete
+
+(*
+This Handler helps to Remove the GTM Hold From On Hold Reason
+*)
+to removeGTMHold
+	try
+		KeyHandlers.scrollTo "On Hold Type","leftPanel",,2
+		try
+			KeyHandlers.validateValues "GTM Hold","leftPanel"
+			KeyHandlers.mouseActionOnPreferredElement "On Hold Reason","leftPanel",,DoubleClick
+			wait 4
+			KeyHandlers.scrollTo "GTM Hold","leftPanel",,2
+			KeyHandlers.clickElement "GTM Hold","leftPanel"
+			KeyHandlers.clickElement "workOrder/icons/leftArrow","leftPanel"
+			KeyHandlers.clickElement "Save",KeyHandlers.generateSRForLabel( "Cancel","topHalf","leftHalf")
+		end try
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end removeGTMHold
+
+(*
+This Handler helps to remove Capability Verification from On Hold Reasons
+*)
+to capabilityVerification
+	KeyHandlers.validateValues "Work Order Number","leftPanel"
+	put  KeyHandlers.readField( "On Hold Reason",[170,0],"leftPanel") into onHoldReason
+	log  onHoldReason
+	"POM/LandingPage".navigateToSDCModule "Capability Verification"
+	--KeyHandlers.validateValues "Work Order Services","leftHalf"
+	KeyHandlers.clickElement "workOrder/icons/filterIcon","rightHalf"
+	KeyHandlers.clickElement "Search","rightPanel"
+	KeyHandlers.enterText "J902"
+	KeyHandlers.clickElement "J902-Bangalore,India Hub","rightPanel"	
+	KeyHandlers.clickElement "Apply","rightHalf"
+	TypeText homeKey
+	KeyHandlers.mouseActionOnPreferredElement "Work Order","leftHalf",,DoubleClick 
+	--change should be done here like read the particular wok order
+	KeyHandlers.validateField "Work Done By","J902 - Bangalore, India Hub",[0,30],"rightPanel"
+	set the TextStyle to {DPI:144}
+	KeyHandlers.clickElement "Calibration","leftPanel"
+	KeyHandlers.scrollTo universal WOData.WorkOrder,"leftPanel"
+	KeyHandlers.clickElement "workOrder/icons/moduleDropdown",KeyHandlers.generateSRForLabel (universal WOData.WorkOrder,"topHalf","bottomHalf")
+	KeyHandlers.clickElement "Add","rightPanel"
+	#adding Calibration to the Work order
+	KeyHandlers.validateValues "Service Site","horizontalMiddle"
+	KeyHandlers.clickElement "workOrder/icons/cancelIcon","horizontalMiddle"
+	KeyHandlers.enterText "J901"
+	KeyHandlers.clickElement "J901 - Hyderabad,India Hub","horizontalMiddle"
+	KeyHandlers.validateValues "Work Center","horizontalMiddle"
+	KeyHandlers.clickElement "Search","horizontalMiddle"
+	KeyHandlers.enterText "DEFA"
+	KeyHandlers.clickElement "DEFAULT","horizontalMidddle"
+	KeyHandlers.clickElement "Turn Around Time","horizontalMiddle"
+	KeyHandlers.enterText "6"
+	KeyHandlers.clickElement "Save","rightPanel"
+	try
+		KeyHandlers.validateValues "Capability Created","headerSection"
+	end try
+	openWorkorder
+	#Checking the Calibration Verification On Hold Reason is removed or not
+	put  KeyHandlers.readField( "On Hold Reason",[170,0],"leftPanel") into onHoldReason
+	log  onHoldReason&&"Capibilty verification was removed"
+	KeyHandlers.validateValues "Work Order Service Name","rightPanel"
+	KeyHandlers.clickElement "View All",KeyHandlers.generateSRForLabel ("Work Order Service Name","topHalf","rightPanel")
+	KeyHandlers.clickElement "Calibration UMU","leftPanel"
+	KeyHandlers.validateValues "Ship To Address","leftPanel"
+	KeyHandlers.scrollTo "Work Done By","leftPanel","down",5
+	wait 2
+	put KeyHandlers.readField("Work Done By",[170,30],KeyHandlers.generateSRForLabel("Work Done By","topHalf","leftHalf")) into workDoneBy
+	log "Work Done By changed"&&workDoneBy 
+	openWorkorder
+	put  KeyHandlers.readField( "On Hold Reason",[170,0],"leftPanel") into onHoldReason
+	log  onHoldReason&&"Capibilty verification was removed"
+end capabilityVerification
+
+(*
+This Handler helps to remove the Entitlement Check On Hold Reason
+*)
+to removeEntitlements
+	try
+	(*openWorkorder
+		put KeyHandlers.readField("On Hold Reason",[140,0],"leftPanel") into onHoldReason
+		log onHoldReason*)
+		KeyHandlers.clickInsideElement "Receiving","rightHalf",[60,0]
+		#click on the update Etitlements from action dropDown 
+		KeyHandlers.clickElement "Update Entitlement","rightPanel"
+		KeyHandlers.validateValues "Warranty Entitlements","horizontalMiddle"
+		KeyHandlers.radioSelect "workOrder/icons/radioButton",KeyHandlers.generateSRForLabel("Trade",[-500,-20,1000,20],"horizontalMiddle")
+		KeyHandlers.radioSelect "workOrder/icons/radioButton",KeyHandlers.generateSRForLabel("Trade",[-250,-20,1000,20],"horizontalMiddle")
+		KeyHandlers.clickElement "Save","rightPanel"
+		put KeyHandlers.readField("On Hold Reason",[140,0],"leftPanel") into onHoldReasonAfterRemovingEntitlement
+		log onHoldReasonAfterRemovingEntitlement&&"Entitlements Check is removed"
+		KeyHandlers.clickElement "Activity","leftPanel"
+		set TextStyle to {DPI:250}
+		#removing the Entitlement Check
+		KeyHandlers.validateValues "Work Order - Entitlement Check" ,KeyHandlers.generateSRForLabel ("Upcoming & Overdue","topHalf","leftPanel")
+		KeyHandlers.clickInsideElement "Work Order - Entitlement Check",KeyHandlers.generateSRForLabel ("Upcoming & Overdue","topHalf","leftPanel"),[-110,0]
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try		
+	
+end removeEntitlements 
+
+(*
+performPricingForRepairService
+*)
+to performPricingForRepairService
+	addChargeCode
+	applyPrice
+	applyDiscount
+	approvePrice
+	sendEmailToCustomer
+	quoteWorkOrder
+end performPricingForRepairService
+
+(*
+This Handler helps to add Charge code to the WOS
+*)
+to addChargeCode
+	try
+		#helps to navigate to Pricing tab
+		KeyHandlers.clickElement "Pricing","leftPanel"
+		KeyHandlers.validateValues "Total List Amount","leftPanel"
+		KeyHandlers.scrollTo "Work Order Invoices","leftPanel",,2
+		wait 2
+		KeyHandlers.clickElement "View All",KeyHandlers.generateSRForLabel("Split" ,"leftHalf","leftHalf")
+		KeyHandlers.validateValues "Work Order Pricing","leftPanel"
+		set the SearchRectangle to KeyHandlers.generateSRForLabel("WOS" ,"topHalf",KeyHandlers.generateSRForLabel("(Re" ,"topHalf","bottomHalf"))
+		KeyHandlers.clickElement   "workOrder/icons/editIcon", the SearchRectangle
+		wait 2
+		KeyHandlers.clickElement "Search SPN/CHAR", the SearchRectangle
+		#adding charge code to the repair WOS
+		KeyHandlers.enterText "REL5A"
+		KeyHandlers.clickElement "REL5A",KeyHandlers.generateSRForLabel("Show more" ,"topHalf","bottomHalf")
+		KeyHandlers.scrollTo "Save","bottomHalf"
+		KeyHandlers.clickElement "Save","bottomHalf"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end addChargeCode
+
+(*
+This Handler helps to add Price to the Work order
+*)
+to applyPrice
+	try
+		openWorkorder
+		#navigating to the Pricing Tab
+		KeyHandlers.clickElement "Pricing","leftPanel"
+		KeyHandlers.validateValues "Total List Amount","leftPanel"
+		KeyHandlers.scrollTo "SD BP Reporting","leftPanel",,2
+		wait 3
+		KeyHandlers.clickElement "New Quote","leftPanel"
+		KeyHandlers.validateValues "Success","headerSection"
+		#Navigating to the Quote page to apply price
+		KeyHandlers.clickInsideElement "Quote","headerSection",[50,0]
+		KeyHandlers.validateValues "Quote Information","leftPanel"
+		put  "POM/InitiateAndAuthenticate".getUrl into universal WOQuoteURL
+		KeyHandlers.clickElement "price","rightPanel"
+		try 
+			KeyHandlers.validateValues "success","headerSection"
+		end try	
+		wait 2
+		KeyHandlers.scrollTo "Search this table","leftHalf",,10
+		put "POM/InitiateAndAuthenticate".getNumberWithoutComma(KeyHandlers.readField("Net Price",[0,30],"bottomHalf")) into global netPrice
+		log "Net Price is "&global netPrice
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end applyPrice
+
+(*
+This Handler helps to add Discount to the Quoted Work Order 
+*)
+to applyDiscount
+	try
+		KeyHandlers.scrollTo "Quote Information","leftHalf",Up,10
+		KeyHandlers.clickElement "Apply Discount","leftPanel"
+		#Filling the necessary details toapply the Discount
+		KeyHandlers.validateValues "Select Discount","leftPanel"
+		wait 2
+		KeyHandlers.mouseActionOnPreferredElement "Select Discount 1",,,DoubleClick 
+		KeyHandlers.clickElement "Select Discount 1","leftPanel"
+		KeyHandlers.mouseActionOnPreferredElement "Discount 1",KeyHandlers.generateSRForLabel("Select Discount 1" ,"topHalf","leftPanel"),2
+		wait 2
+		KeyHandlers.clickElement "Negotiated discount","leftHalf"
+		KeyHandlers.mouseActionOnPreferredElement "Discount 1 %",,1	
+		KeyHandlers.enterText "12"
+		KeyHandlers.clickElement "Save","rightPanel"
+		KeyHandlers.scrollTo "Quote Information","leftHalf",Up,10
+		KeyHandlers.validateValues "Apply Discount","rightHalf"
+		#Clicking on the Apply Discount to apply the Discount
+		KeyHandlers.clickElement "Apply Discount","rightHalf"
+		try
+			KeyHandlers.validateValues "Success","headerSection"
+		end  try	
+		wait 3
+		typetext endKey
+		KeyHandlers.scrollTo "Charge Code","horizontalMiddle",Down,10
+		#Validating Discount APplied or not And checking the Price After Discount
+		put KeyHandlers.readField ("Discount 1 Value",[0,30],"bottomHalf") into discount
+		log "Discount"&&discount
+		put "POM/InitiateAndAuthenticate".getNumberWithoutComma(KeyHandlers.readField("Net Price",[0,30],"bottomHalf")) into netPriceAfterDiscount
+		log "Net Price After Discount"&&netPriceAfterDiscount
+		assert that (global netPrice) minus (global netPrice*12%) is (netPriceAfterDiscount) with"  difference in net price after discount" 
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end applyDiscount	
+
+(*
+This Handler helps to Approve the Price
+*)
+to approvePrice
+	try
+		KeyHandlers.scrollTo "Quote Information","leftHalf",Up,10
+		KeyHandlers.clickElement "Submit for Approval","topHalf"
+		try
+			KeyHandlers.validateValues "Success","headerSection"
+		end try	
+		KeyHandlers.clickElement "Approvals","leftHalf"
+		KeyHandlers.clickElement "Approve","rightPanel"
+		KeyHandlers.validateValues "Approve Work Order Quote","Center"
+		KeyHandlers.enterText "test"
+		KeyHandlers.clickElement "Approve","rightPanel"
+		try
+			KeyHandlers.validateValues "Work Order Quoted","headerSection"
+		end try
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end approvePrice
+(*
+This Handler helps to send Email to the Customer
+*)
+to sendEmailToCustomer
+	try
+		KeyHandlers.scrollTo "Email Quote","topHalf",Up
+		KeyHandlers.clickElement "Email Quote","topHalf"
+		KeyHandlers.validateValues "CFD Parameter Entry","Center"
+		KeyHandlers.validateValues "Sender Email","horizontalMiddle"
+		KeyHandlers.validateValues "Recipient Email","horizontalMiddle"
+		KeyHandlers.clickElement "Send Email","rightPanel"
+		try
+			KeyHandlers.validateValues "sent to your email address","headerSection"
+		end try	
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end sendEmailToCustomer 
+
+(*
+This Handler helps to Quote the Work Order
+*)
+to quoteWorkOrder
+	try
+		openWorkorder
+		KeyHandlers.scrollTo "Quoting","leftPanel",,2
+		try
+			KeyHandlers.validateValues "Quote Status","leftPanel",5
+		catch
+			KeyHandlers.clickElement "Quoting","leftPanel"
+		end try
+		wait 2
+		put KeyHandlers.readField("Quote Status" ,[150,0],"leftPanel") into QuoteStatus
+		log "Quote Status after sending Email"&&QuoteStatus
+		typetext controlKey,l
+		typetext universal WOQuoteURL,return
+		KeyHandlers.webPageLoad
+		KeyHandlers.validateValues "Quote Information"
+		KeyHandlers.clickElement "Quote Accepted","rightHalf"
+		try
+			KeyHandlers.validateValues "Success","headerSection"
+		end try
+		KeyHandlers.clickElement "Quote information","lefPanel"
+		put KeyHandlers.readField("Quote Status" ,[170,0],KeyHandlers.generateSRForLabel("Quote Details","topHalf","leftPanel")) into QuoteStatus
+		log "Quote Status after Accepting Quote"&&QuoteStatus
+		#Navigating to the Work Order and checking the Quote Status
+		openWorkorder
+		KeyHandlers.scrollTo "Quoting","leftPanel",,2
+		try
+			KeyHandlers.validateValues "Quote Status","leftPanel",5
+		catch
+			KeyHandlers.clickElement "Quoting","leftPanel"
+		end try
+		put KeyHandlers.readField("Quote Status" ,[150,0],"leftPanel") into QuoteStatus
+		log "Quote Status in WO : "&&QuoteStatus
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end quoteWorkOrder
+
+(*
+This Handler helps to change the Status of the Work Order
+*)
+to changeStatusToQuotedtoActual
+	try
+		navigateToParticularWorkOrderService "Repair"
+		KeyHandlers.clickElement "Ship To Address","leftHalf"
+		KeyHandlers.scrollTo "Quoted Price","leftPanel",,2
+		wait 3
+		#Validating Quoted Price and Actual Price
+		KeyHandlers.validateField "Quoted Price",,[150,0],"leftPanel"
+		KeyHandlers.validateField "Actual Price",,[150,0],"leftPanel"
+		KeyHandlers.scrollTo "Ship To Address","topHalf",UP,7
+		#Changing the status of the Work order to Quoted VS Actual
+		KeyHandlers.clickElement "Quoted VS Actual","rightPanel"
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		try
+			set the TextStyle to {DPI:144}
+			KeyHandlers.validateValues "Status changed successfully","headerSection",5
+		end try
+		wait 2
+		Run "POM/InitiateAndAuthenticate".refreshBrowser
+		KeyHandlers.clickElement "Ship To Address","leftHalf"
+		KeyHandlers.scrollTo "Quoted Price","leftPanel",,2
+		wait 3
+		#Validating the Quoted And Actual Price after chnaging the Work Order Status
+		put KeyHandlers.readField( "Quoted Price",[150,0],"leftPanel") into QuotedPrice
+		log "Quote Price Added Successfully"&&QuotedPrice
+		put KeyHandlers.readField( "Actual Price",[150,0],"leftPanel") into ActualPrice 
+		log "Actual Price Added Successfully"&&ActualPrice
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end changeStatusToQuotedtoActual 
+(*
+This Handler helps to delete the Work Order Labour(WOL)
+*)
+to deleteWOL
+	try		
+		KeyHandlers.scrollTo "Work Order Parts","rightPanel",Up
+		KeyHandlers.validateValues "Work Order Labour","rightPanel"
+		KeyHandlers.clickElement "workOrder/icons/moduleDropdown",KeyHandlers.generateSRForLabel("Repair",[0,-25,800,40],"rightPanel")
+		KeyHandlers.clickElement "Delete","rightPanel"
+		KeyHandlers.validateValues "Work order Labour cannot be deleted","headerSection"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end deleteWOL
+(*
+This Handler helps to Edit the Work Order Labour(WOL)
+*)
+to editWOL
+	try
+		KeyHandlers.validateValues "Work Order Labour","rightPanel"
+		KeyHandlers.clickElement "workOrder/icons/moduleDropdown",KeyHandlers.generateSRForLabel("Diagnosis",[0,-25,800,40],"rightPanel")
+		KeyHandlers.clickElement "Edit",KeyHandlers.generateSRForLabel("Diagnosis","topHalf","rightPanel")
+		KeyHandlers.validateValues "Hours","horizontalMiddle"
+		KeyHandlers.textEntry "Hours","6","horizontalMiddle",[145,0]
+		KeyHandlers.clickElement "Save","rightPanel"
+		#after clicking save error message occurs
+		KeyHandlers.validateValues "We hit a snag","leftPanel"
+		KeyHandlers.clickElement "Cancel","leftPanel"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end editWOL
+
+(*
+This handler helps to create new Work order Quoted labour(WOQL) 
+*)
+to createNewWOQL
+	try
+		KeyHandlers.validateValues "Work Order Labour","rightPanel"
+		KeyHandlers.clickElement "New",KeyHandlers.generateSRForLabel("Work Order Quoted Labours","topHalf","rightPanel")
+		#After clicking new pop up displays
+		KeyHandlers.validateValues "Work Order Service","horizontalMiddle"
+		KeyHandlers.clickElement "Activity","leftHalf"
+		KeyHandlers.clickElement "Calibration","leftHalf"
+		KeyHandlers.clickElement "Save","rightPanel"
+		#after clicking Save we are getting error message
+		KeyHandlers.validateValues "We hit a snag","leftPanel"
+		KeyHandlers.clickElement "Cancel","leftPanel"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end createNewWOQL
+
+(* 
+This handler will navigate to the Order Parts and Creates an Order Part
+*)
+to fillInFormOrderParts
+	try
+		#Clicks the Order Parts 
+		KeyHandlers.clickElement "Order Parts",KeyHandlers.generateSRForLabel("Work Order Parts",[100,-10,750,100])
+		wait 1
+		#Searches the Product 
+		KeyHandlers.textEntry "Product Search","1250-125","leftHalf",[50,20]
+		wait 1
+		typetext return
+		set the TextStyle to {DPI:250}
+		KeyHandlers.clickElement "1250-1250","leftHalf"
+		set the TextStyle to {DPI:72}
+		KeyHandlers.dropDown "Select ShipperNotes","Exchange Only - No Item Substitution","topHalf",[50,20]
+		#Submits the selected Product 
+		KeyHandlers.clickElement "Submit","topHalf"
+		KeyHandlers.clickElement "Yes","center"
+		"POM/WOHandlers".validateMessage "Success"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end fillInFormOrderParts
+
+(* 
+This handler will changes the part order status to Delivered
+*)
+to handle consumeOrderPartsOne
+	try
+		#Navigates to the Repair Page
+		KeyHandlers.clickElement "Repair","rightHalf"
+		KeyHandlers.dropDown "Expected Delivery Date","Edit",KeyHandlers.generateSRForLabel("Work Order Parts",[100,-10,750,100]),[150,30]
+		#Opens the Work Order Part Item and Changes the  status to Delivered
+		KeyHandlers.dropDown "Original Part","Delivered","leftHalf",[150,50]
+		#Changes the status to Delivered and it gets saved
+		KeyHandlers.clickElement "Save",KeyHandlers.generateSRForLabel("New","topHalf","bottomHalf")
+		set the TextStyle to {DPI:144}
+		try
+			KeyHandlers.validateValues "was saved","headerSection",5
+		end try
+		#Checks the status of the Work Order
+		consumedStatusCheck "Delivered"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end consumeOrderPartsOne
+
+(* 
+This handler will change the part order status to Consumed
+*)
+to handle consumeOrderPartsTwo
+	try
+		#Navigates to the Repair page
+		KeyHandlers.clickElement "Repair","rightHalf"
+		#Gets the URL of the existing page
+		put "POM/InitiateAndAuthenticate".getURL into WOPRepairURL
+		#Navigates to the Consumption page
+		KeyHandlers.clickElement "Consumption",KeyHandlers.generateSRForLabel("Work Order Parts",[100,-10,750,100])
+		KeyHandlers.validateValues "Update Order Parts","webForm"
+		#Filling the details of Parts Used Code and Parts Description in the Consumption page 
+		KeyHandlers.dropDown "Parts Used Code","Consumed","rightHalf",[100,55]
+		KeyHandlers.clickElement "Part Description","webForm"
+		wait 4
+		#Repeating the action until the Part Description is displayed
+		repeat until not ImageFound(imageName:"workOrder/icons/rightArrow",waitfor:5,SearchRectangle:Sections().SearchAreas.("rightHalf"))
+			repeat 5 times
+				DoubleClick FoundImageLocation()
+			end repeat
+			wait 1
+		end repeat
+		#Filling the Failure Comment 
+		KeyHandlers.textEntry "Failure Comment","This comments for testing purpose","topHalf",[150,70]
+		#Updating the Order Parts 
+		KeyHandlers.clickElement "Update Order Parts","center"
+		wait 3
+		TypeText controlKey,"l"
+		TypeText WOPRepairURL,return
+		KeyHandlers.webPageLoad
+		#Checks the status of the Work Order
+		consumedStatusCheck "Consumed"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end consumeOrderPartsTwo
+
+(* 
+This handler is used to check the status of the Work Order Parts
+@Params:- workOrderStatus - the status of the Work Order is sent here 
+*)
+to handle consumedStatusCheck workOrderStatus
+	try
+		#Setting the Search Rectangle to check the Status of the Work Order Parts 
+		set the SearchRectangle to KeyHandlers.generateSRForLabel("Work Order Parts","topHalf","rightPanel")
+		KeyHandlers.validateValues workOrderStatus,KeyHandlers.generateSRForLabel("status","topHalf", the SearchRectangle)
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end consumedStatusCheck
+
+
+(* 
+This handler is used to complete the calibration service
+*)
+to handle completeCalibrationService
+	try
+		#Navigates to the Calibration Work Order Service
+		KeyHandlers.clickElement "Calibration","rightHalf"
+		KeyHandlers.validateValues "Ship To Address","leftHalf"
+		#Clicking on the in Progress to change its state
+		KeyHandlers.clickElement "Complete","rightHalf"
+		KeyHandlers.clickElement "Mark as Current Status","rightHalf"
+		KeyHandlers.validateValues "Please ensure Work Order Labour","topHalf"
+		#Navigates to the Work Order Labour Edit Page
+		KeyHandlers.dropDown "Standard Labour Rate","Edit",KeyHandlers.generateSRForLabel("Work Order Labours",[100,-10,750,150]),[150,30]
+		KeyHandlers.validateValues "Required Information","rightHalf"
+		#Editing the Hours Section from the Work Order Labour Edit Page
+		KeyHandlers.textEntry "Hours","4","center",[200,00]
+		set the TextStyle to {DPI:144, contrast:"On", contrastColor:"#0075D6", contrastTolerance:"45"}
+		#Changes the Hours field and it gets saved
+		KeyHandlers.clickElement "Save","bottomHalf"
+		set the TextStyle to {DPI:144}
+		KeyHandlers.validateValues "was saved","topHalf"
+		//Navigating to the top of the webpage
+		KeyHandlers.scrollTo "Ship To Address","topHalf","up"
+		wait 2
+		KeyHandlers.validateValues "Ship To Address","leftHalf"
+		#Moving the Work Order Labour to In Progress State
+		KeyHandlers.clickElement "In Progress","topHalf"
+		KeyHandlers.clickElement "Mark as Current Status","rightHalf"
+		KeyHandlers.validateValues "Status changed successfully","topHalf"
+		#Moving the Work Order Labour to Complete State
+		KeyHandlers.clickElement "Complete","rightHalf"
+		KeyHandlers.clickElement "Mark as Current Status","rightHalf"
+		KeyHandlers.validateValues "Status changed successfully","topHalf"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end completeCalibrationService
+
+
+(*
+This handler will navigate to WOS Calibration and verifies the calibration Interval
+*)
+to navigateToWOSCalibrationAndVerifyDateInterval
+	try
+		#Below line will navigates to Specific Work Order Service
+		"POM/workOrderPage".navigateToParticularWorkOrderService "Calibration"
+		KeyHandlers.scrollTo "Calibration Due","leftPanel",,2
+		#validates the Calibration Interval Field to 12
+		KeyHandlers.validateField "Calibration Interval","12",[120,0],"leftPanel"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end navigateToWOSCalibrationAndVerifyDateInterval
+
+(* 
+This handler will fill the details in WOS calibration 
+ *)
+to fillDetailsInWOSCalibration
+	try
+		#below line will navigates the entire page to Edit mode by double clicking on As Received Condition tab
+		KeyHandlers.mouseActionOnPreferredElement "As Received Condition","leftPanel",,DoubleClick
+		wait 2
+		#Below will fills the mandatory fileds
+		KeyHandlers.dropDown "As Received Condition","In Tolerance","leftPanel",[140,0]
+		KeyHandlers.dropDown "As Completed Condition","Out Of Tolerance","leftPanel",[140,0]
+		KeyHandlers.dropDown "Calibration Date","Today","leftPanel",[140,0]
+		KeyHandlers.clickInsideElement "Calibration Date","leftPanel",[140,0]
+		KeyHandlers.scrollTo "Internal comments","leftPanel",,2
+		#Below line will change the Action Taken to Adj Not Possible
+		KeyHandlers.clickElement "Adj Not Possible","leftPanel"
+		KeyHandlers.clickElement "workOrder/icons/rightArrow","leftPanel"
+		KeyHandlers.clickElement "Save",KeyHandlers.generateSRForLabel( "Cancel","topHalf","leftHalf")
+		wait 5
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end fillDetailsInWOSCalibration
+
+(* 
+This handler will validate the Calibration Due Date whether it is reflected or not
+ *)
+to validateCalibrationDueDate
+	try
+		typetext homeKey
+		KeyHandlers.scrollTo "Calibration Interval","leftPanel",,2
+		#reads the Calibration Interval Field value
+		put KeyHandlers.readField("Calibration Interval",[120,0],"leftPanel") into calibrationInterval
+		#calculates the Calibration Due date and validates in screen
+		KeyHandlers.validateField "Calibration Due",formattedTime("M/d/yyyy",today plus calibrationInterval months),[120,0],"leftPanel"
+		log "Calibration Due Date is reflected that Calibration Date plus Calibration Interval"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end validateCalibrationDueDate
+
+(*
+This Handler helps to change the Work Order Service(WOS) of Repair To Complete
+*)
+to changeRepairWOSToComplete
+	try
+		#this Handler helps to navigate to Repair WOS
+		navigateToParticularWorkOrderService "Repair"
+		KeyHandlers.clickElement "Ship To Address","leftHalf"
+		KeyHandlers.scrollTo "Quoted Price USD","leftPanel",,2
+		wait 3
+		#Validating the Quoted And Actual Price after chnaging the Work Order Status
+		put KeyHandlers.readField( "Quoted Price USD",[150,0],"leftPanel") into QuotedPriceUSD
+		log "Quote Price USD Added Successfully"&&QuotedPriceUSD
+		put KeyHandlers.readField( "Actual Price USD",[150,0],"leftPanel") into ActualPriceUSD 
+		log "Actual Price USD Added Successfully"&&ActualPriceUSD
+		KeyHandlers.scrollTo "Ship To Address","topHalf",UP,7
+		#Changing the status of the Work order to Quoted VS Actual
+		KeyHandlers.clickElement "Complete","rightPanel"
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		try
+			set the TextStyle to {DPI:144}
+			KeyHandlers.validateValues "You encountered some errors","headerSection"
+		end try
+		KeyHandlers.scrollTo "Technician Quoted vs Actual Note","leftPanel",,2
+		wait 3
+		set the TextStyle to {DPI:144}
+		#Double click on the Technician Quoted vs Actual Note to enable the editing option
+		KeyHandlers.mouseActionOnPreferredElement "Technician Quoted vs Actual Note","leftPanel",,DoubleClick 
+		KeyHandlers.textEntry "Technician Quoted vs Actual Note","test","leftPanel",[150,0]
+		KeyHandlers.clickElement "Save",KeyHandlers.generateSRForLabel("Cancel","topHalf","leftPanel")
+		KeyHandlers.scrollTo "Ship To Address","topHalf",UP,7
+		#Changing the status of the Work order to Quoted VS Actual
+		KeyHandlers.clickElement "Complete","rightPanel"
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		#validating the message to check status changed or not
+		"POM/WOHandlers".validateMessage "Status changed successfully"
+		set the TextStyle to Default
+		#Reading the status of the WOS
+		put KeyHandlers.readField("Status" ,[150,0],"leftPanel") into Status
+		log "Work Order Service Status:"&&Status
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end changeRepairWOSToComplete
+
+(*
+this Handler helps to change the tranship outbound WOS status to clean & close
+*)
+to changeTranshipWOSToCleanAndClose
+	try
+		#This Handler helps to navigate to tranship outbound WOS
+		navigateToParticularWorkOrderService "Tranship"
+		#click on the clean & close button to change the status
+		KeyHandlers.clickElement "Clean & Close","leftPanel"
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		#validating the message to check status changed or not
+		"POM/WOHandlers".validateMessage "Status changed successfully"
+		#This Handler helps to edit the data
+		editTheProductData
+		KeyHandlers.clickElement "Packaging","leftPanel"
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		#validating the message to check status changed or not
+		"POM/WOHandlers".validateMessage "Status changed successfully"
+		#we are copying the url
+		put "POM/InitiateAndAuthenticate".getURL into url
+		#we are loging with SD System admin credential
+		"POM/InitiateAndAuthenticate".launchSalesforce "SD System Admin"
+		"POM/InitiateAndAuthenticate".loginToSandbox
+		#open the current work order
+		openWorkorder
+		#remove the gtm hold from On Hold Reason in work order 
+		removeGTMHold
+		"POM/InitiateAndAuthenticate".launchSalesforce "SD Logistics Admin"
+		"POM/InitiateAndAuthenticate".loginToSandbox
+		#pasting the copied url 
+		typetext controlKey,"l"
+		TypeText controlKey,"a"
+		TypeText url,returnKey
+		KeyHandlers.validateValues "Ship To Address","leftHalf"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end changeTranshipWOSToCleanAndClose
+(*
+this Handler helps to edit the product data
+*)
+to editTheProductData
+	try
+		#double click on the Product is clean to enable edit 
+		KeyHandlers.mouseActionOnPreferredElement "Product is clean","leftPanel",,DoubleClick 
+		wait 2
+		try
+			#ifSafety test exist validate its status
+			KeyHandlers.validateValues "Safety Test","leftPanel",2
+			KeyHandlers.validateField "Safety Test","Passed",[170,0],"leftpanel"
+		end try
+		KeyHandlers.clickElement "Product is clean","leftpanel"
+		KeyHandlers.clickElement "Product is undamaged","leftpanel"
+		KeyHandlers.clickElement "Product-No. and Serial-No. matches","leftpanel"
+		KeyHandlers.clickElement "Accessories are complete","leftpanel"
+		KeyHandlers.clickElement "Save","leftPanel"
+		wait 3
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end editTheProductData
+
+to changeTranshipWOSToShipping
+	try
+		set the TextStyle to {DPI:144}
+		KeyHandlers.clickElement "Shipping Administration","leftPanel"
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		"POM/WOHandlers".validateMessage "You encountered some errors"
+		editTheProductData
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		"POM/WOHandlers".validateMessage "Status changed successfully"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end changeTranshipWOSToShipping
+
+to completeTranshipOutBoundService
+	try
+		changeTranshipWOSToCleanAndClose
+		changeTranshipWOSToShipping
+		--KeyHandlers.validateValues "Ship To Address","leftHalf"
+		KeyHandlers.clickElement "Ready To Ship","rightPanel"
+		set the TextStyle to {DPI:144,contrast:on}
+		wait 1
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		"POM/WOHandlers".validateMessage "Status changed successfully"
+		KeyHandlers.clickElement "In Transit","rightPanel"
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		"POM/WOHandlers".validateMessage "Status changed successfully"
+		KeyHandlers.clickElement "Complete","rightPanel"
+		KeyHandlers.clickElement "Mark as Current Status","rightPanel"
+		"POM/WOHandlers".validateMessage "Status changed successfully"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end completeTranshipOutBoundService

@@ -1,0 +1,54 @@
+-- TC_ENOVIA_001
+-- Steps 1-10 follow the observed video-based flow. Steps 11-13 require an
+-- authenticated detail view; the live session expired while opening row 1.
+
+-- Step 1: Open the global Search dropdown using its captured arrow image.
+Click imageName:"enovia_global_search_dropdown_arrow_1793953633239", waitFor:10
+WaitFor 10, text:"Advanced Search", SearchRectangle:[1123,130,1328,408]
+
+-- Step 2: Choose Advanced Search from the global Search menu.
+Click text:"Advanced Search", SearchRectangle:[1123,130,1328,408], waitFor:10
+WaitFor 20, text:"3DSearch - Advanced Searches", SearchRectangle:[480,132,900,168]
+
+-- Step 3: Verify the Source field already contains Collaborative Spaces.
+WaitFor 10, text:"Collaborative Spaces", SearchRectangle:[20,198,450,247]
+
+-- Step 4: Open the Type selector in the left criteria panel.
+WaitFor 10, text:"Select a type (optional)", SearchRectangle:[20,283,450,324]
+Click text:"Select a type (optional)", SearchRectangle:[20,283,450,324], waitFor:10
+
+-- Step 5: Filter the Type options.
+TypeText "part"
+WaitFor 10, text:"Assembly Part Specification Reference", SearchRectangle:[20,324,450,525]
+MoveTo text:"Assembly Part Specification Reference", SearchRectangle:[20,324,450,525]
+
+-- Step 6: Scroll the Type dropdown one increment at a time until the exact
+-- standalone Part option is visible; each iteration checks before scrolling.
+repeat 12 times
+    if ImageFound(text:"Part", ValidPattern:"^Part$", SearchRectangle:[20,324,450,525], waitFor:1) then
+        exit repeat
+    end if
+    ScrollWheelDown 1
+end repeat
+WaitFor 10, text:"Part", ValidPattern:"^Part$", SearchRectangle:[20,324,450,525]
+
+-- Step 7: Select the exact standalone Part option and verify its selected tag.
+Click text:"Part", ValidPattern:"^Part$", SearchRectangle:[20,324,450,525], waitFor:10
+WaitFor 10, text:"Part", SearchRectangle:[20,338,100,379]
+
+-- Step 8: Run Advanced Search using Search in the left criteria panel.
+Click text:"Search", SearchRectangle:[378,968,460,1019], waitFor:10
+
+-- Step 9: Wait for the result grid and read the first data row dynamically.
+WaitFor 60, text:"Title", SearchRectangle:[480,213,1005,247]
+WaitFor 60, text:"Part", SearchRectangle:[1005,247,1169,273]
+put ReadText((535,248),(1005,273)) into firstResultIdentifier
+log "First result row identifier: " && firstResultIdentifier
+
+-- Step 10: Open row 1 from its row context menu, using the runtime identifier.
+RightClick text:firstResultIdentifier, SearchRectangle:[535,247,1005,273], waitFor:10
+WaitFor 10, text:"Open", SearchRectangle:[580,420,800,470]
+Click text:"Open", SearchRectangle:[580,420,800,470], waitFor:10
+
+-- Steps 11-13 are not yet implemented: verify the opened record identity,
+-- inspect Properties, and verify Related Items after restoring SUT login.

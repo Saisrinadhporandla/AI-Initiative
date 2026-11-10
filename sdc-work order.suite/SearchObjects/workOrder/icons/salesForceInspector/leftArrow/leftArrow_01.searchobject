@@ -1,0 +1,48 @@
+{
+	"originalcapturelocation": [
+		260,
+		771,
+		10,
+		13
+	],
+	"lastmodifieddate": 1725969903.177,
+	"createddate": 1725969903.177,
+	"name": "workOrder/icons/salesForceInspector/leftArrow/leftArrow_01",
+	"lastfounddate": 1729590565.714,
+	"ocrcapturestring": "<",
+	"lastfoundlocation": [
+		260,
+		789,
+		10,
+		13
+	],
+	"testlocationdata": [
+		{
+				"connectionportnum": 3389,
+				"properties": {
+					"CropRectangle": "[0,0,0,0]",
+					"Rotate": 0,
+					"Scale": "    1",
+					"HotSpot": "[5,6]",
+					"Tolerance": "_45",
+					"Discrepancy": "_0",
+					"SearchType": "Tolerant of Background"
+				},
+				"sutinfo": {
+					"type": "Unknown RDP"
+				},
+				"name": "workOrder/icons/salesForceInspector/leftArrow/leftArrow_01.png",
+				"connectionname": "venkatesh_SUT_82",
+				"type": 1,
+				"connectionserverid": "156.140.21.82",
+				"capturerect": [
+					260,
+					771,
+					10,
+					13
+				],
+				"connectiontype": "RDP",
+				"capturedocrtext": "<"
+			}
+	]
+}

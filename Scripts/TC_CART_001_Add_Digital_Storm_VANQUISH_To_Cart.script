@@ -1,0 +1,35 @@
+(*
+Test case: TC_CART_001 - Add Digital Storm VANQUISH to Cart
+Source: input/nopcommerce_test_cases_download.xlsx, Sheet 2 (Test Steps)
+
+The configured nopCommerce storefront must be open on the SUT.
+*)
+
+-- Step 1: Confirm the storefront navigation is loaded.
+IsElementPresentOnScreen "Computers", waitTime:10
+
+-- Step 2: Open Computers and verify the category heading.
+WaitFor 10, text:"Computers"
+Click text:"Computers", waitFor:10
+IsElementPresentOnScreen "Computers", waitTime:10
+
+-- Step 3: Open Desktops and verify the heading and breadcrumb.
+WaitFor 10, text:"Desktops"
+Click text:"Desktops", waitFor:10
+IsElementPresentOnScreen "Desktops", waitTime:10
+IsElementPresentOnScreen "Computers", waitTime:10
+
+-- Step 4: Locate the specified product in the listing.
+scrollTo "Digital Storm VANQUISH Custom Performance PC", [0,0,1920,1080]
+IsElementPresentOnScreen "Digital Storm VANQUISH Custom Performance PC", waitTime:10
+
+-- Step 5: Verify the observed product price before adding it.
+IsElementPresentOnScreen "$1,259.00", waitTime:10
+
+-- Step 6: Add the product using its second listing-card button.
+-- The listing order is Build your own computer, Digital Storm VANQUISH, Lenovo IdeaCentre.
+scrollTo "Add to cart", [0,0,1920,1080]
+click item 2 of EveryImageLocation(text:"Add to cart")
+
+-- Step 7: Validate the success notification.
+IsElementPresentOnScreen "The product has been added to your shopping cart", waitTime:10

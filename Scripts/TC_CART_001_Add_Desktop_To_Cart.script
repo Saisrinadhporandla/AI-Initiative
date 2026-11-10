@@ -1,0 +1,31 @@
+(*
+Test case: TC_CART_001 - Add a desktop computer to the shopping cart
+Source: input/nopcommerce_test_cases_download.xlsx
+
+Uses the installed Studio visible-text click and wait patterns.
+Requires the SUT to be open on the nopCommerce storefront.
+*)
+
+-- Steps 1-2: Open the Computers category.
+WaitFor 10, text:"Computers"
+Click text:"Computers", waitFor:10
+
+-- Step 3: Open Desktops.
+WaitFor 10, text:"Desktops"
+Click text:"Desktops", waitFor:10
+
+-- Step 4: Open the exact product rather than using one of the repeated
+-- Add to cart controls on the listing.
+WaitFor 10, text:"Digital Storm VANQUISH Custom Performance PC"
+Click text:"Digital Storm VANQUISH Custom Performance PC", waitFor:10
+WaitFor 10, text:"Digital Storm Vanquish 3 Desktop PC"
+
+-- Step 5: The product price is observed at runtime and is not a fixed
+-- expected value in the workbook.
+
+-- Step 6: On the uniquely identified product page, add the product once.
+WaitFor 10, text:"ADD TO CART"
+Click text:"ADD TO CART", waitFor:10
+
+-- Step 7: Verify the expected success notification after adding the product.
+WaitFor 10, text:"The product has been added to your shopping cart"

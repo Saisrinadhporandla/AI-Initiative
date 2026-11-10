@@ -1,0 +1,46 @@
+{
+	"lastmodifieddate": 1728642788.7589998,
+	"lastfoundlocation": [
+		259,
+		691,
+		9,
+		11
+	],
+	"originalcapturelocation": [
+		259,
+		499,
+		9,
+		11
+	],
+	"createddate": 1728642788.7589998,
+	"lastfounddate": 1728974792.997,
+	"testlocationdata": [
+		{
+				"connectionportnum": 3389,
+				"properties": {
+					"CropRectangle": "[0,0,0,0]",
+					"Rotate": 0,
+					"Scale": "    1",
+					"HotSpot": "[4,5]",
+					"Tolerance": "_45",
+					"Discrepancy": "_0",
+					"SearchType": "Tolerant of Background"
+				},
+				"sutinfo": {
+					"type": "Unknown RDP"
+				},
+				"name": "workOrder/icons/rightArrow/rightArrow_02.png",
+				"connectionname": "venkatesh_SUT_82",
+				"type": 1,
+				"capturerect": [
+					259,
+					499,
+					9,
+					11
+				],
+				"connectiontype": "RDP",
+				"connectionserverid": "156.140.21.82"
+			}
+	],
+	"name": "workOrder/icons/rightArrow/rightArrow_02"
+}

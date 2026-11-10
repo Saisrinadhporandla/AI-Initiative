@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "eggplant-studio-64898": {
+      "type": "http",
+      "url": "http://127.0.0.1:64898/mcp"
+    },
+    "eggplant-gateway-6072": {
+      "type": "http",
+      "url": "http://127.0.0.1:58708/mcp",
+      "headers": {
+        "Authorization": "Basic OGZiNTFlODUtZjkzMy00NDZlLWJhZjgtNmJiMmU1ZWVmNTI0OjFiZmRkZDMxLWU0YzMtNDY1Ni05NWEzLTE4NDY0MzRiYWVkOA=="
+      }
+    }
+  }
+}

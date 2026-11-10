@@ -1,0 +1,126 @@
+// Each is a powerful concept in SenseTalk worth understanding to make your scripts more readable
+// Add some break points to step through code and see how SenseTalk is working
+
+(* Section 1: Introduction to Each *)
+(* This section introduces the concept of "each" in SenseTalk and demonstrates its basic usage. *)
+put "How big is each and how does it process a chunk of data?"
+// An "each" expression works with any chunk type and results in a list
+put each character of "Elephant"
+put each item of "red,orange,yellow"
+put each word of "Hamlet"
+put each item of [3,5,7,9]
+
+put - // used to divide the sections of the script
+
+(* Section 2: Filtering with Each *)
+(* This section shows how to use "where", "which", and "whose" clauses with "each" to filter items based on conditions. *)
+put "Can I use a where clause with each?"
+// A Where clause lets you select certain items
+put each character of "William Shakespeare" where each is in "aeiou"
+put each word of "Hamlet" where the length of each is more than 3
+put each item of [3,5,7,9,11] where each is a multiple of 3
+
+put "Can I use a which instead of where with each? Yes!"
+// "Which" can enhance readability and feels more natural
+// It takes the place of "where each" or "each"
+put each item of 1..100 where each is a multiple of 17
+put each item of 1..100 which is a multiple of 17
+put each item of 1..100 which is a multiple of 17 and which is an even number
+
+put "Can I use a whose instead of which or where with each? Yes! Remember whose is possessive"
+// "Whose" is similar but includes the possessive: where each's
+set quote to {{
+    It's not that I'm so smart, it's just that I stay with problems longer.
+    - Albert Einstein
+}}
+put each word of quote where each's length is more than 4
+put each word of quote whose length is more than 4 and which contains "s"
+
+put - // used to divide the sections of the script
+
+(* Section 3: Performing Operations with Each *)
+(* This section shows how to perform operations on each item in a collection. *)
+put "How can I perform an operation with each item and do the action on all items?"
+put each item of 1..10 squared
+put 100 plus each item of 1..10
+put "M" & each character of "aeiou"
+put each word of "Hamlet"
+put the length of each word of "Hamlet"
+
+(* Section 4: Using Operators with Where Clause *)
+(* This section demonstrates the use of operators along with a "where" clause in "each" expressions. *)
+put "Using operators along with a Where clause"
+put each item of 1..10 squared
+put each item of 1..10 where each is a multiple of 2
+put each item of 1..10 where each is a multiple of 2 squared
+put each item of 1..10 {where each is a multiple of 2} squared
+
+put - // used to divide the sections of the script
+
+(* Section 5: Expressiveness of Each *)
+(* This section highlights the expressiveness of "each" expressions without adding new functionality. *)
+put "Each expressions add great expressiveness but no new functionality"
+put each character of "eggplant" into eChars
+put eChars
+set eChars to an empty list
+repeat with each character of "eggplant"
+    insert it into eChars
+end repeat
+put eChars
+put -
+put the length of each word of "Hamlet" which contains "R" into rLengths
+put rLengths
+set rLengths to an empty list
+repeat with each word of "Hamlet"
+    if it contains "R" then
+        insert the length of it into rLengths
+    end if
+end repeat
+put rLengths
+
+put - // used to divide the sections of the script
+
+(* Section 6: Using Of/For Each *)
+(* This section explains the additional flexibility provided by "of each" and "for each" for generating results. *)
+put "Using 'for each' gives additional flexibility for generating results"
+put each item of 1..10 {where each is a multiple of 3} squared
+put each squared for each item of 1..10 where each is a multiple of 3
+put the square root of each item of 1..10 rounded to 2 places
+--put round(the square root of each item of 1..10 , 2)
+put round(the square root of each , 2) for each item of 1..10
+set numbers to 10..20
+put each && "squared is" && each squared for each item of numbers into squareTexts
+put squareTexts joined by return
+set myText to "The quick brown fox jumps over the lazy dog"
+put word number of "the" within myText
+put the counter for each word of myText which is "the"
+
+put - // used to divide the sections of the script
+
+(* Section 7: Containing Each Expressions *)
+(* This section discusses the need to contain "each" expressions using parentheses to avoid issues with surrounding operators. *)
+put "Because an Each expression expands to include surrounding operators, sometimes you'll need to contain it by enclosing it in parentheses"
+put each word of "Hamlet" which contains "R"
+put the number of items in each word of "Hamlet" which contains "R"
+put the number of items in (each word of "Hamlet" which contains "R")
+set numList to [4, -8, 17, -5, -2, 6, 12]
+put the average of each item in numList which is greater than 0
+put the average of (each item in numList which is greater than 0)
+
+put - // used to divide the sections of the script
+
+(* Section 8: Using Every Expression *)
+(* This section introduces the "every" expression to test conditions across all items in a collection. *)
+put "Use an Every expression to test whether something is true for every value in a collection "
+set numbers to [3,42,12,96,102]
+put each item of numbers is a multiple of 3 -- this doesn't quite work
+if every item of numbers is a multiple of 3 then put "All Triples" else put "NOT!"
+put every item of numbers {which is an even number} is greater than 10
+// Variations include "not every", "at least one", "none" or "not one"
+if not every item of numbers is an even number then put "Some are Odd"
+if at least one item of numbers is an even number then put "Contains an Even number"
+if none of the items of numbers is greater than 150 then put "Nothing over 150"
+if not one word of "Hamlet" begins with "S" then put "No S Words"
+if the length of at least one word of "Hamlet" > 4 then put "Long Words"
+
+put "End of Each Demo"

@@ -1,0 +1,207 @@
+put "What is a List?"
+// - an ordered sequence of values
+// - don't confuse a list with its representation
+// Add some break points to step through code and see how SenseTalk is working
+put [1,2,3,4,5] into myList
+put myList
+set the listFormat to boxListFormat
+put myList
+put [dog,cat,rabbit] into animals1
+put [rabbit,dog,cat] into animals2
+put animals1
+put animals2
+put animals1 is equal to animals2
+
+put - // used to divide the sections of the script
+
+(* Section 1: Accessing List Items *)
+(* How to access and manipulate items within a list. *)
+put "How can you access items of a list?"
+// The elements in a list are called ITEMS or LIST ITEMS
+set animals to [giraffe, pony, lion, mouse, elephant]
+put animals
+put item 1 of animals -- the first item is number 1
+put item 4 of animals
+put items 3 to 5 of animals
+put "lizard" into item 7 of animals
+put the last 4 items of animals
+put "Amoeba" into item -2 of animals
+put animals
+put "zebra" into items 2 to 4 of animals
+put animals
+put "---"
+set quantities to [12, 4, 7, 0, 18]
+put quantities
+add 1 to item 1 of quantities
+divide item 2 of quantities by 2
+put quantities
+multiply quantities by 3
+put quantities
+
+put - // used to divide the sections of the script
+
+(* Section 2: List Contents *)
+(* Exploring the types of values that can be stored in a list. *)
+put "What can be in a list?"
+// A list can hold any type of values
+put [44, 18, 62, 3] into numberList
+put ["hat", "egg", "sew"] into wordList
+put [[15, 7], [110, 908]] into listOfLists
+put item 1 of listOfLists is a point
+put listOfLists is a rectangle
+// Not common, but possible:
+put [
+  "arrow",
+  98.6,
+  ["a", "B", 77],
+  {x:42, y:78},
+  <7 letters, "#", 3 digits>,
+  color("blue")
+] into mixedList
+put mixedList
+
+put - // used to divide the sections of the script
+
+(* Section 3: Inserting Items into a List *)
+(* Methods to insert items into a list at various positions. *)
+put "How can you insert items into the list?"
+set snacks to be an empty list
+put snacks
+insert "popcorn" into snacks
+insert "chocolate" into snacks
+put snacks
+insert "carrots" into snacks
+put snacks
+insert "peanuts" before snacks
+put snacks
+insert "gummies" before item 3 of snacks
+put snacks
+insert "chips" into item 2 of snacks
+put snacks
+put "---"
+put "apples" into snacks
+put snacks
+insert "almonds" into snacks
+put snacks
+insert ["oranges", "blueberries"] after item 1 of snacks
+put snacks
+put "The listInsertionMode is: " & the listInsertionMode
+put
+insert ["tea", "lemonade"] nested before the last item of snacks
+put snacks
+
+put - // used to divide the sections of the script
+
+(* Section 4: Deleting Items from a List *)
+(* Techniques to delete items from a list. *)
+put "How can you delete items from the list?"
+set trees to ["pine", "elm", "oak", "redwood", "yew", "walnut"]
+delete item 2 of trees
+put trees
+delete each item of trees which is "yew"
+put trees
+delete each item of trees which doesn't contain "a"
+put trees
+
+put - // used to divide the sections of the script
+
+(* Section 5: Examining List Contents *)
+(* Methods to examine and query the contents of a list. *)
+put "How can you examine the list's content?"
+// Examining the contents of a list
+set trees to ["pine", "elm", "oak", "redwood", "yew", "walnut"]
+put the number of items in trees
+put "yew" is among the items of trees
+put "oak" is in trees
+put "---"
+put trees contains "red"
+put trees contains "redwood"
+put at least one item of trees contains "red"
+put "---"
+put trees contains ["elm", "oak"]
+put trees contains ["pine", "oak"]
+put every item of ["pine", "oak"] is in trees
+put "---"
+put trees begins with "pine"
+put trees begins with "pin"
+put trees begins with ["pine", "elm", "oak"]
+put trees ends with ["yew", "walnut"]
+put "---"
+put each item of trees which contains "o"
+
+put - // used to divide the sections of the script
+
+(* Section 6: Changing List Order *)
+(* Sorting, reversing, and shuffling the order of list items. *)
+put "How can you change the order of the list?"
+// Changing the order of a list: Sort, Reverse, Shuffle
+set trees to ["pine", "elm", "oak", "redwood", "yew", "walnut"]
+sort trees
+put trees
+sort trees in descending order by the length of each
+put trees
+reverse trees
+put trees
+shuffle trees
+put trees
+
+put - // used to divide the sections of the script
+
+(* Section 7: Advanced List Operations *)
+(* Demonstrating advanced operations and manipulations with lists. *)
+put "Bonus! Power usage of lists"
+put the hamletMainCast into hamlet
+put hamletCast() into everyone
+put the name of each item of (the first 20 items of everyone)
+put items of hamlet that are also in everyone
+put the items of everyone shared in common with hamlet
+put the name of each item of hamlet whose race isn't "Human"
+put "End of List Demo"
+
+to handle hamletMainCast
+  set mainCastData to {{
+    Name,Role,Race
+    Hamlet,Prince of Denmark,Human
+    Claudius,King of Denmark,Human
+    Gertrude,Queen of Denmark,Human
+    Polonius,Lord Chamberlain,Human
+    Ophelia,Daughter of Polonius,Human
+    Laertes,Son of Polonius,Human
+    The Ghost,Former King of Denmark,Ghost
+    Horatio,Friend of Hamlet,Human
+    Rosencrantz,Friend of Hamlet,Human
+    Guildenstern,Friend of Hamlet,Human
+  }}
+  put CSVValue of mainCastData into hamletMain
+  return hamletMain
+end hamletMainCast
+
+to handle hamletCast
+  set hamletCastData to {{
+    Name,Role,Race
+    Hamlet,Prince of Denmark,Human
+    Claudius,King of Denmark,Human
+    Gertrude,Queen of Denmark,Human
+    Polonius,Lord Chamberlain,Human
+    Ophelia,Daughter of Polonius,Human
+    Laertes,Son of Polonius,Human
+    The Ghost,Former King of Denmark,Ghost
+    Horatio,Friend of Hamlet,Human
+    Rosencrantz,Friend of Hamlet,Human
+    Guildenstern,Friend of Hamlet,Human
+    Osric,Courtier,Human
+    Marcellus,Officer,Human
+    Bernardo,Officer,Human
+    Francisco,Officer,Human
+    Voltemand,Diplomat,Human
+    Cornelius,Diplomat,Human
+    Reynaldo,Servant to Polonius,Human
+    Fortinbras,Prince of Norway,Human
+    Gravedigger,Grave Digger,Human
+    Yorick,Former Court Jester,Ghost
+
+  }}
+  put CSVValue of hamletCastData into everyone
+  return everyone
+end hamletCast
+

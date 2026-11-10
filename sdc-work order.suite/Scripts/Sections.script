@@ -1,0 +1,53 @@
+﻿(**
+@scriptName: 
+@searchAreas: 
+@offset:
+@explicitWait:
+@Author: Venkatesh Thatavarthi
+@Version : 0.1
+@Modified Reason (if):
+**)
+
+return{
+	searchAreas: 
+	{
+		webForm: [0,73,1919,1035],
+		leftHalf: [-25,-10,960,1035],
+		rightHalf: [960,73,1919,1035],
+		topHalf: [-40,-10,1919,517.5],
+		bottomHalf: [0,517.5,1919,1035],
+		Center: [[600,300],[1300,850]],
+		browserRefresh: [0,10,260,100],
+		runWindow:[4,779,557,1080],
+		headerSection:[1,80,1919,287],
+		footerSection:[0,786,1920,1080],
+		horizontalMiddle:[0,368,1920,761],
+		verticalMiddle:[526,167,1311,1034],
+		leftPanel:[12,268,968,1037],
+		rightPanel:[945,268,1919,1037],
+		notificationPanel:[1469,176,1904,349],
+		subTab:[1,209,1901,275],
+		SDCModules:[171,173,465,632],
+		topLeftQuadrant:[0,0,1920/2,1080/2],
+		topRightQuadrant:[1920/2,0,1920,1080/2],
+		bottomLeftQuadrant:[0,1080/2,1920/2,1080],
+		messagePortion:[50,150,1900,310],
+		bottomRightQuadrant:[1920/2,1080/2,1920,1080]
+	},
+	offset: 
+	{
+		nullOffset:[0,0],
+		textBoxOffset: [115,0],
+		dropBoxOffset:[x,y],
+		loginTextBoxOffset:[30,30],
+		dealFieldsValidationOffset:[130,0],
+		camapignCostingPlannedOffset:[220,0]
+	},
+	explicitWait:
+	{
+		maxWait:30,
+		minWait:10,
+	}
+}
+
+

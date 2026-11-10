@@ -1,0 +1,71 @@
+// Simple patterns can be useful in your scripts
+// Add some break points to step through code and see how SenseTalk is working
+
+(* Section 1: Basic Pattern Matching *)
+(* Counting occurrences and deleting punctuation from text. *)
+set text to "Jared: 38, Rhonda: 182, Vic: 385, Chris: 746!!"
+put the number of occurrences of "8" in text
+put the number of occurrences of <digit> in text
+put every occurrence of <digit> in text
+put text
+delete <punctuation> from text
+put text
+
+put - // used to divide the sections of the script
+
+(* Section 2: Complex Patterns *)
+(* Using complex patterns to validate identifiers. *)
+put "How complex can patterns be?"
+set identifier to "D843//16q"
+set identPattern to <capital letter, 3 digits, "//", 2 digits, character in "pqrs">
+if identifier matches identPattern then put "VALID" else put "INVALID"
+
+put - // used to divide the sections of the script
+
+(* Section 3: Pattern Operators and Functions *)
+(* Examples of various operators, commands, and functions with patterns. *)
+put "93sth&4p" begins with <2 digits, "sth">
+put "93sth&4p" ends with <"&", digit, letter>
+put "Martin (Marty) Johnson" contains <"(", characters, ")">
+put "Always!Big&gray:wolf" split by <punctuation char>
+
+put - // used to divide the sections of the script
+
+(* Section 4: Building and Using Patterns *)
+(* Creating patterns for US Taxpayer Identification Numbers and validating entries. *)
+// US Taxpayer Identification Number
+// Social Security Number: 666-44-3210
+// Employer Identification Number: 88-4829571
+put "what can be done once a pattern is built?"
+set SSN to <3 digits, "-", 2 digits, "-", 4 digits>
+set EIN to <2 digits then dash then 6 or more digits>
+set TIN to <SSN or EIN>
+repeat with each entry in ["808-43-5678", "77-435679084", "666-14-123"]
+    if entry matches TIN then
+        put entry & " is a valid TIN"
+    else
+        put entry & " is NOT valid"
+    end if
+end repeat
+
+put - // used to divide the sections of the script
+
+(* Section 5: More Complex Patterns *)
+(* Handling various formats of USA phone numbers. *)
+// USA phone numbers: (888) 555-4567 888-555-4567 888.555.4567 555-4567
+put "Can you provide more examples of complex patterns?"
+set AC1 to <"(", 3 digits, ")", maybe a space>
+set AC2 to <3 digits, dash>
+set AC3 to <3 digits, ".">
+set areaCode to <AC1 or AC2 or AC3>
+set NUM to <3 digits, dash or ".", 4 digits>
+set PhoneNum to <10 digits or (maybe areaCode, NUM)>
+set phoneList to {{
+Frank 404-555-1212
+Maria (808)555-4321
+Golda 555-4503
+Grace 454.555.0982
+}}
+put every occurrence of PhoneNum in phoneList
+
+put "End of Patterns Demo"

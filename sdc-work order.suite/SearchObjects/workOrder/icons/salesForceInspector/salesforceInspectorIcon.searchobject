@@ -1,0 +1,46 @@
+{
+	"lastmodifieddate": 1725959135.2259998,
+	"lastfoundlocation": [
+		1894,
+		220,
+		9,
+		16
+	],
+	"originalcapturelocation": [
+		1911,
+		220,
+		9,
+		16
+	],
+	"createddate": 1725959135.2259998,
+	"lastfounddate": 1725967687.891,
+	"testlocationdata": [
+		{
+				"connectionportnum": 3389,
+				"properties": {
+					"CropRectangle": "[0,0,0,0]",
+					"Rotate": 0,
+					"Scale": "    1",
+					"HotSpot": "[4,8]",
+					"Tolerance": "_45",
+					"Discrepancy": "_0",
+					"SearchType": "Tolerant of Background"
+				},
+				"sutinfo": {
+					"type": "Unknown RDP"
+				},
+				"name": "workOrder/icons/salesForceInspector/salesforceInspectorIcon.png",
+				"connectionname": "venkatesh_SUT_82",
+				"type": 1,
+				"capturerect": [
+					1911,
+					220,
+					9,
+					16
+				],
+				"connectiontype": "RDP",
+				"connectionserverid": "156.140.21.82"
+			}
+	],
+	"name": "workOrder/icons/salesForceInspector/salesforceInspectorIcon"
+}

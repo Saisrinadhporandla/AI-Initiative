@@ -1,0 +1,167 @@
+﻿#Prepare data in SDC ready for testing
+scenario_01
+#Create Work Order with Repair Service Bundle
+scenario_02
+#Perform Receiving (Logistic Inbound)
+scenario_03
+#TAT Paused functionality
+scenario_04
+#Manage Service - Add Calibration, Calibratio UMU, Service Note & Technical Evaluation services
+scenario_05
+#Remove Service - Technical Evaluation
+scenario_06
+
+
+to scenario_01
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD System Admin"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/LandingPage".searchForEggplantRegressionTestAsset
+	"POM/AssetPage".checkOpenWOAndCheckASNAndSNStatus
+	"POM/CapabilitiesPage".navigateToCapabilities
+	"POM/CapabilitiesPage".removeCapabilities
+end scenario_01
+
+to scenario_02
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".navigateToWorkOrders
+	"POM/workOrderPage".createWorkOrder
+end scenario_02
+
+to scenario_03
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD Logistics Admin"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".performReceiving
+end scenario_03
+
+to scenario_04
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder   
+	"POM/workOrderPage".checkWaitForCustomerPO
+	"POM/workOrderPage".validateTATPausedValueForWaitforCustomerPO
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".setAcctAuthToClearHoldReason
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".validateOnHoldTimeDifferenceForWaitCustomerPO
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".navigateToTestSNote
+	"POM/workOrderPage".fillDetailsInNeedsResolution
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".checkNeedsResolutionAndValidateInInspector
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".clearNeedsResolution
+	"POM/workOrderPage".validateOnHoldTimeDifferenceForNeedsResolution
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".changeHoldReasonToAdminHold
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".checkAdminHoldAndValidateInInspector
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".removeHoldReasonToAdminHold
+	"POM/workOrderPage".validateOnHoldTimeDifferenceAdminHold
+end scenario_04
+
+to scenario_05
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".manageServices
+end scenario_05
+
+to scenario_06
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".removeTechnicalEvaluation
+end scenario_06
+
+to scenario_07
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SC Technician"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".navigateToParticularWorkOrderService
+	"POM/workOrderPage".validateErrorDiagnoisesQuoteDetailsQuoteAcceptance
+	"POM/workOrderPage".fillHoursForWOLAndWOQL
+end scenario_07
+
+to scenario_08
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".performPricingForRepairService
+end scenario_08
+
+to scenario_09
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".capabilityVerification
+	"POM/workOrderPage".removeEntitlements
+end scenario_09
+
+to scenario_10
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".performAndCompleteServiceNoteService
+end scenario_10
+
+to scenario_11
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".fillTestSNoteWOS
+	"POM/workOrderPage".fillInFormOrderParts
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD System Admin"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".consumeOrderPartsOne
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".consumeOrderPartsTwo
+end scenario_11
+
+to scenario_12
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".changeStatusToQuotedtoActual
+	"POM/workOrderPage".deleteWOL
+	"POM/workOrderPage".editWOL
+	"POM/workOrderPage".createNewWOQL
+end scenario_12
+
+to scenario_13
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".changeRepairWOSToComplete
+end scenario_13
+
+to scenario_14
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SC Technician"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".navigateToWOSCalibrationAndVerifyDateInterval
+	"POM/workOrderPage".fillDetailsInWOSCalibration
+	"POM/workOrderPage".validateCalibrationDueDate
+end scenario_14
+
+to scenario_15
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD SOM Support Order Management CSR"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".completeCalibrationService
+end scenario_15
+
+to scenario_16
+	"POM/InitiateAndAuthenticate".launchSalesforce "SD Logistics Admin"
+	"POM/InitiateAndAuthenticate".loginToSandbox
+	"POM/workOrderPage".openWorkorder
+	"POM/workOrderPage".completeTranshipOutBoundService
+end scenario_16
+
+
+

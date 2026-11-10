@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "eggplant-studio-58711": {
+      "type": "http",
+      "url": "http://127.0.0.1:58711/mcp"
+    }
+  }
+}

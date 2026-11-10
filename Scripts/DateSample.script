@@ -1,0 +1,145 @@
+
+(*
+Scripts will often rely on dates and SenseTalk has many handy ways to work with them
+Add some break points to step through code and see how SenseTalk is working
+*)
+      
+(* Section 1: Calculating Days Since Ada Lovelace's Birthday *)
+(* This section calculates the number of days since Ada Lovelace's birthday and logs the result. *)
+put "December 10, 1815" into AdaLovelaceBirthday
+put today
+put today - AdaLovelaceBirthday
+put (today - AdaLovelaceBirthday) as days into daysSinceAdaWasBorn
+log "Ada Lovelace was born" && daysSinceAdaWasBorn && "ago."
+logWarning "That's approximately" && ((daysSinceAdaWasBorn as days) as integer) && "days."
+
+(* Section 2: Calculating Days Since ChatGPT-4's Release *)
+(* This section calculates the number of days since the release of ChatGPT-4 and logs the result. *)
+put "March 14, 2023" into ChatGPT4
+put today
+put today - ChatGPT4
+put (today - ChatGPT4) as days
+      
+put - // used to divide the sections of the script
+      
+(* Section 3: SenseTalk's Time Origin *)
+(* This section explains and demonstrates how SenseTalk counts date/time values from the beginning of the millennium. *)
+put "When does SenseTalk start the clock? The beginning of Millenium"
+(* Date/time values in SenseTalk are counted on a time-line whose origin is the beginning of the millenium: January 1, 2001 00:00:00 UTC *)
+put time(0) into startingTime
+convert startingTime to UTC Time
+put startingTime
+put the seconds of startingTime
+put
+add 2 days 12 minutes to startingTime
+put startingTime
+put the seconds of startingTime
+put
+subtract 1 week from startingTime
+put startingTime
+put the seconds of startingTime
+      
+put - // used to divide the sections of the script
+      
+(* Section 4: Accessing Current Date and Time *)
+(* This section shows various ways to access the current date and time in SenseTalk. *)
+put "How can I access the current date and/or time?"
+put the date
+put the international date
+put yesterday
+put today
+put tomorrow
+put 2 days ago
+put 3 days hence
+      
+(* Section 5: Accessing Current Time *)
+(* This section provides examples of accessing the current time in different formats. *)
+put "Some more examples"
+put the time
+put the international time
+put now
+put 12 minutes ago
+put 7 hours hence
+      
+(* Section 6: Clock Formats *)
+(* This section demonstrates how to work with different clock formats in SenseTalk. *)
+put "Some various clock formats"
+put the clockFormat & ": " & the time
+set the clockFormat to 24
+put the clockFormat & ": " & the time
+      
+put - // used to divide the sections of the script
+      
+(* Section 7: Accessing Parts of Date/Time *)
+(* This section explains how to access individual parts of a date or time value. *)
+put "How can I access individual parts of the date or time in my script?"
+set sampleDate to "March 16, 1927 04:15 AM"
+put "Year:"
+put year of sampleDate
+put the year
+put "Month:"
+put month(sampleDate) && monthName(sampleDate)
+put month() && the monthName
+put "Day:"
+put sampleDate's day
+put the day
+put "Hour, minute, second:"
+put the [hour, minute, second] of sampleDate
+put the hour && the minute && the second
+put "Day of week:"
+put dayOfWeek of sampleDate && sampleDate.weekDayName
+put the dayOfWeek && weekDayName()
+put "Day of year, day of common era:"
+put sampleDate.dayOfYear && dayOfCommonEra(sampleDate)
+put the dayOfYear && the dayOfCommonEra
+      
+put - // used to divide the sections of the script
+      
+(* Section 8: Common Date/Time Operations *)
+(* This section demonstrates how to perform common operations on date/time values. *)
+put "How can I perform some common operations on date/time values?"
+// Measure elapsed time
+put the time into startTime
+put "starting a hard wait of 3 seconds"
+wait 3 seconds
+put the time - startTime
+// Determine the difference between 2 date/time values
+put "5:00 pm" - "14:30"
+put "June 12" - "April 3"
+put ("June 12" - "April 3") as days
+put ("June 12" - "March 3") rounded to the nearest day
+      
+put - // used to divide the sections of the script
+      
+(* Section 9: Adding/Subtracting Durations *)
+(* This section shows how to add or subtract durations from date/time values. *)
+put "What if I need to add or subtract durations?"
+put "April 15" + 20 days
+put "2020-03-14" - 2 weeks
+put "9 June 2022 10:20 AM" + 3 hours 15 minutes into SummerTime
+put SummerTime
+      
+put - // used to divide the sections of the script
+      
+(* Section 10: Adding/Subtracting Calendar Durations *)
+(* This section explains how to add or subtract calendar durations from date/time values. *)
+put "What if I need to add or subtract calendar durations?"
+put "April 15" + 3 days
+put "18 February 2022" - 2 days
+put "2020-01-31" + 1 day
+      
+put - // used to divide the sections of the script
+      
+(* Section 11: Handling Date Formats *)
+(* This section highlights the importance of being careful with date formats and demonstrates some operations. *)
+put "Be careful as a date format in hide details"
+put "February 11" as date into event
+add 3 days to event
+put event
+put time of event
+add 2 hours to event
+put event
+put time of event
+put year of event
+      
+put "End of Date Demo"

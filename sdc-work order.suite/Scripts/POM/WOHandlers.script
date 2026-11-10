@@ -1,0 +1,144 @@
+﻿(****
+COMMONLY USED LINES IN FRAMEWORK :-
+the TextStyle : This function is used to configure properties for Optical Character Recognition (OCR) when the default settings struggle to accurately identify text.
+ErrorMessageCustomization.captureScreenAndNotifyError theException : This handler captures any exceptions that occur when the script fails, providing a user-friendly error message in the console and taking a snap of the failure.
+Params : This refers to the parameters or arguments that are passed to a function or script to customize its behavior or input data. These parameters allow users to specify different values or configurations for the automation tasks, enabling more flexible and reusable scripts
+****)
+
+
+(*
+This Handler helps to read the On Hold Reasons and store them 
+*)
+to checkAndStoreOnHoldReasonAndTime onHoldReason
+	try
+		try
+			KeyHandlers.validateValues "Work Order Number","leftPanel",5
+		catch
+			#click on the work Order tab
+			KeyHandlers.clickElement "Work Order",KeyHandlers.generateSRForLabel("Work Order",[-10,20,500,500],"bottomHalf")
+		end try
+		KeyHandlers.validateField "On Hold Reason",onHoldReason,[150,2],"leftPanel"
+		#closing All the lighting Arrow in the work order Page
+		"POM/WOHandlers".	collapseAllLightningArrows
+		KeyHandlers.scrollTo "Scheduling","leftPanel",,3
+		try
+			KeyHandlers.validateValues "Schedule Date","leftPanel",5
+		catch
+			KeyHandlers.clickElement "Scheduling","leftPanel"
+		end try
+		KeyHandlers.scrollTo "On Hold Time","leftPanel",,2
+		wait 2
+		#Reading the On Hold Reason
+		put KeyHandlers.readField("On Hold Time",[110,0],"leftPanel") into universal onHoldTime
+		typetext homeKey
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end checkAndStoreOnHoldReasonAndTime
+
+(*
+This Handler helps to navigate to the Salesforce Inspector
+*)
+to navigateSalesforceInspector
+	try
+		---KeyHandlers.clickElement "workOrder/icons/salesForceInspector"
+		#used to open the Salesforce Inspector
+		typetext altKey,i
+		KeyHandlers.clickElement "Show all data","rightPanel"
+		KeyHandlers.webPageLoad
+		KeyHandlers.validateValues ["Filter","SalesForce Home"],"headerSection"
+		Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end navigateSalesforceInspector
+
+(*
+this Handler helps to Add On Hold Reason  to the work Order
+Params:Passing the required On Hold Reason to add
+*)
+to addOnHoldReason
+	Params onHoldReason
+	try
+		try
+			KeyHandlers.validateValues "Work Order Number","leftPanel",5
+		catch
+			KeyHandlers.clickElement "Work Order",KeyHandlers.generateSRForLabel("Work Order",[-10,20,500,500],"bottomHalf")
+		end try
+		#double click on the On Hold Reason to enable that for editing
+		KeyHandlers.mouseActionOnPreferredElement "On Hold Reason","leftPanel",,DoubleClick
+		KeyHandlers.scrollTo "On Hold Type","leftPanel",,2
+		KeyHandlers.mouseActionOnPreferredElement "Account","leftPanel",,MoveTo
+		KeyHandlers.scrollTo onHoldReason
+		#clcik on the Required On Hold Reason
+		KeyHandlers.clickElement onHoldReason
+		#to add the On hold Reason into choosen tab
+		typetext tabKey,return
+		KeyHandlers.clickElement "Save",KeyHandlers.generateSRForLabel("Cancel","topHalf","bottomHalf")
+		wait 5
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end addOnHoldReason
+
+(*
+This handler helps to remove the On Hold Reasons in the Work Order page
+params:Passing the required On Hold Reason
+*)
+to removeOnHoldReason
+	Params onHoldReason
+	try
+		try
+			KeyHandlers.validateValues "Work Order Number","leftPanel",3
+		catch
+			KeyHandlers.clickElement "Work Order",KeyHandlers.generateSRForLabel("Work Order",[-10,20,500,500],"bottomHalf")
+		end try
+		KeyHandlers.mouseActionOnPreferredElement "On Hold Reason","leftPanel",,DoubleClick
+		KeyHandlers.scrollTo "On Hold Type","leftPanel",,2
+		KeyHandlers.clickElement onHoldReason
+		KeyHandlers.clickElement "workOrder/icons/leftArrow"
+		KeyHandlers.clickElement "Save",KeyHandlers.generateSRForLabel("Cancel","topHalf","bottomHalf")
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end removeOnHoldReason
+
+(*
+This Handler helps to close all the lighting Arrows
+*)
+to collapseAllLightningArrows
+	try
+		repeat until not ImageFound(image:"workOrder/icons/lightningArrow",SearchRectangle:Sections().searchAreas.("leftHalf"),waitfor:30 ticks)
+			click FoundImageLocation()
+			ScrollWheelDown 1		
+			wait 2
+		end repeat
+		typetext homeKey
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end collapseAllLightningArrows
+
+(*
+This Handler helps to navigate to Scheduling Tab
+*)
+to navigateToScheduling
+	"POM/WOHandlers".collapseAllLightningArrows
+	wait 1
+	KeyHandlers.clickElement "Services Delivery","headerSection"
+	KeyHandlers.scrollTo "Scheduling","leftPanel",,3
+	try
+		KeyHandlers.validateValues "Schedule Date","leftPanel",5
+	catch
+		KeyHandlers.clickElement "Scheduling","leftPanel"
+	end try
+end navigateToScheduling
+
+to validateMessage
+	Params message
+	try
+		set the TextStyle to {DPI:144}
+		KeyHandlers.validateValues message,"headerSection",5
+	end try
+	set the TextStyle to default
+end validateMessage
+

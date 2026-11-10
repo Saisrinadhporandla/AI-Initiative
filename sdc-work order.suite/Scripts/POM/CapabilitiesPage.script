@@ -1,0 +1,106 @@
+﻿(****
+COMMONLY USED LINES IN FRAMEWORK :-
+the TextStyle : This function is used to configure properties for Optical Character Recognition (OCR) when the default settings struggle to accurately identify text.
+ErrorMessageCustomization.captureScreenAndNotifyError theException : This handler captures any exceptions that occur when the script fails, providing a user-friendly error message in the console and taking a snap of the failure.
+Params : This refers to the parameters or arguments that are passed to a function or script to customize its behavior or input data. These parameters allow users to specify different values or configurations for the automation tasks, enabling more flexible and reusable scripts
+****)
+
+(*
+This Handler helps to navigate to Capabilities Page
+*)
+to navigateToCapabilities
+	try
+		#click on the Capabilities from module dropDown
+		"POM/LandingPage".navigateToSDCModule "Capabilities"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end navigateToCapabilities
+
+(*
+This Handler helps to remove the Capabilities
+*)
+to removeCapabilities
+	try
+		KeyHandlers.clickElement "Recently Viewed","headerSection"
+		KeyHandlers.clickElement "All","topHalf"
+		--	KeyHandlers.validateValues "Capabilities Name","topHalf"
+		KeyHandlers.validateValues "Printable View","headerSection"
+		wait 2
+		KeyHandlers.clickInsideElement "Printable View","rightHalf",[50,50]
+		#removing the filters
+		KeyHandlers.clickElement "Remove All","rightHalf"
+		try
+			set the TextStyle to {DPI:144}
+			KeyHandlers.validateValues "Save","rightHalf",5
+			KeyHandlers.clickElement "Save","rightHalf"
+		end try
+		addFilter "Product","N1914B"
+		addFilter "Se","Calibration UMU"
+		set the TextStyle to {DPI:144}
+		KeyHandlers.clickElement "Save","rightHalf"
+		deleteCapabilities
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end removeCapabilities
+
+(*
+This handler helps to add filters in the filter tab to get the required Capabilities
+*)
+
+to addFilter
+	Params fieldName,fieldValue,fieldOperator
+	try
+		KeyHandlers.clickElement "Add Filter","rightHalf"
+		KeyHandlers.enterText fieldName,,"Yes"
+		if fieldOperator is not empty then
+			KeyHandlers.clickInsideElement "Operator","rightHalf",[5,15]
+			KeyHandlers.enterText fieldOperator,,"Yes"
+		end if
+		KeyHandlers.textEntry "Value",fieldValue,"rightHalf"
+		KeyHandlers.clickElement "Done","horizontalMiddle"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end addFilter
+
+(*
+This Handler helps to remove the extising Capabilities in the Capability Page
+*)
+
+to deleteCapabilities
+	try
+		wait 1
+		repeat until not imagefound(imageName:"workOrder/icons/moduleDropdown",waitfor:5,SearchRectangle:Sections().SearchAreas.("verticalMiddle"))
+			KeyHandlers.clickElement "workOrder/icons/moduleDropdown","verticalMiddle"
+			#click on the delete to the capabilities
+			KeyHandlers.clickElement "Delete","rightHalf"
+			KeyHandlers.validateValues "Delete Capability","Center"
+			KeyHandlers.clickElement "Delete",KeyHandlers.generateSRForLabel("Cancel","topHalf","Center")
+			try
+				KeyHandlers.validateValues "deleted","headerSection"
+			end try
+			click [800,800]
+		end repeat
+		log "All the Capabilities are removed"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end deleteCapabilities
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

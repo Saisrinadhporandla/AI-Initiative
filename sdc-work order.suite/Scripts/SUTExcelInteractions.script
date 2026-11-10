@@ -1,0 +1,59 @@
+﻿//Find text in a cell by matching entire cell content by passing a word 
+to handle findTextInACell word 
+	try
+		TypeText controlKey,"f"
+		wait 0.5
+		TypeText controlKey,"a"
+		TypeText backspace
+		wait 0.5
+		TypeText altKey,"t"
+		KeyHandlers.validateValues "Find and Replace","Center"
+		TypeText altKey,"t"
+		wait 0.5
+		TypeText word
+		TypeText altKey,"f"
+		wait 0.5
+		TypeText altKey,f4
+		wait 0.5
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end findTextInACell
+
+//Close the workbook by not saving the data
+to handle closeFileByDontSave 
+	try
+		KeyDown altKey
+		wait 1
+		TypeText f4
+		KeyUp altKey
+		if imageFound(text:"Save",waitfor:Sections().explicitWait.("minWait"),SearchRectangle:Sections().searchAreas.("webForm")) then
+			KeyDown altKey		
+			TypeText "n"
+			wait 1
+			KeyUp altKey
+		end if 
+		if imageFound(text:"Microsoft Excel",waitfor:5,SearchRectangle:Sections().searchAreas.("horizontalMiddle"),dpi:144) then
+			KeyDown altKey		
+			TypeText "N"
+			wait 1
+			KeyUp altKey
+		end if 
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end closeFileByDontSave
+
+//Clicking on the Enable Edit button in Excel Workbook 
+to handle enableEditing 
+	try
+		if ImageFound(text:"Enable Editing",SearchRectangle:Sections().searchAreas.("topHalf"),caseSensitive:true,waitfor:5) then
+			Click FoundImageLocation()
+			Log "Now the Excel Workbook is in Editing Mode."
+		else 
+			Log "The Excel Workbook is already in Editing Mode."
+		end if
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end enableEditing

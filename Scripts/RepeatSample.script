@@ -1,0 +1,139 @@
+// Scripts will often perform actions in a repeat. Here are examples of SenseTalk repeats
+// Add some break points to step through code and see how SenseTalk is working
+
+(* Section 1: Basic Repeat Loop *)
+(* Demonstrates a simple repeat loop that counts up to 10. *)
+put "How can I repeat?"
+repeat forever
+    add 1 to count
+    put "I'm counting to " & count
+    if count > 10 then exit repeat
+end repeat
+set count to 0 -- to reset the count for subsequent loops
+
+put - // used to divide the sections of the script
+
+(* Section 2: Counting Up and Down *)
+(* Shows how to count up to 10 and then count down by 3. *)
+put "How can I go up 10 times and then count down?"
+put "Counting to ten:"
+repeat for num = 1 to 10
+    put "Count: " & num
+end repeat
+set num to 0 -- to reset the count for subsequent loops
+put "And back again:"
+repeat with num = 10 down to 1 by 3
+    put "Count: " & num
+end repeat
+set num to 0 -- to reset the count for subsequent loops
+
+put - // used to divide the sections of the script
+
+(* Section 3: Fixed Number of Repeats *)
+(* Repeating a specific number of times. *)
+put "How can I count a specific number of times?"
+repeat 10 times
+    add 1 to count
+    put "Counting: " & count
+end repeat
+set count to 0 -- to reset the count for subsequent loops
+
+put - // used to divide the sections of the script
+
+(* Section 4: Conditional Repeats *)
+(* Using repeat until and repeat while loops. *)
+put "How can I count until something happens or while something happens?"
+set count to 0 -- to reset the count for subsequent loops
+put "The following is the until loop"
+repeat until count >= 10
+    add 1 to count
+    put "Count: " & count
+end repeat
+put "The following is the while loop"
+set count to 12
+repeat while count > 0
+    put "Count: " & count
+    subtract 1 from count
+end repeat
+set count to 0 -- to reset the count for subsequent loops
+
+put - // used to divide the sections of the script
+
+(* Section 5: Iterating Over Lists *)
+(* Performing actions on each item in a list. *)
+put "How can I do an action on each item in a group or list of items?"
+set pets to ["Murphy", "Rose", "Bolivia"]
+repeat with each item of pets
+    put it & " is my pet"
+end repeat
+put "You can specify 'each' in the loop"
+repeat with each name in pets
+    put name & " is my pet"
+end repeat
+put "Here is another simple example with the same result"
+repeat with name in pets
+    put name
+end repeat
+put "The example shows easy SenseTalk can process through items and use 'it' "
+repeat with pets
+    put it
+end repeat
+
+put - // used to divide the sections of the script
+
+(* Section 6: Iterating Over Property Lists *)
+(* Actions on each attribute of a property list. *)
+put "How can I do an action on each attribute of a property list?"
+set scores to {John: 22, Alicia: 17, Raymond: 38, Greta:41}
+repeat with each item in the keys of scores
+    put it & "'s score is " & scores.(it)
+end repeat
+put -
+repeat with each [name,score] in scores
+    put name & "'s score is " & score
+end repeat
+
+put - // used to divide the sections of the script
+
+(* Section 7: Processing Large Text Blocks *)
+(* Actions on each line or word in a text block. *)
+put "How can I do an action on a large block of data, like a text block?"
+set text to {{
+    Adam & Eve were the first ones
+    to ignore the Apple terms and conditions.
+}}
+repeat with each line of text
+    put !"Line [[the counter]]: [[it]]" --a concatenation example.
+end repeat
+
+repeat with each word theWord of text
+    put theWord
+end repeat
+
+put - // used to divide the sections of the script
+
+(* Section 8: Adding Logic to Repeats *)
+(* Incorporating logic within repeat loops. *)
+put "How can I build in some logic to my repeats?"
+set countries to [
+    {name:"England", capital:"London", area:50_310 sq mi, population:56_536_419},
+    {name:"Germany", capital:"Berlin", area:357_600 km^2, population:84_607_016},
+    {name:"France", capital:"Paris", area:643_801 km^2, population:68_373_433},
+    {name:"Belgium", capital:"Brussels", area:11_849 mi^2, population:68_373_433},
+    {name:"Australia", capital:"Canberra", area:2_968_464 sq mi, population:27_072_900},
+    {name:"United States", capital:"Washinton, DC", area:3_796_742 sq mi, population:334_914_895},
+    {name:"India", capital:"New Delhi", area:3_287_263 sq km, population:1_428_627_663},
+]
+repeat with each country in countries
+    if country's capital begins with "B" then
+        put "Skipping " & country.name
+        next repeat
+    end if
+    put country.[name,area,population] into [name,area,pop]
+    set populationDensity to pop / (area as hectare)
+    put !"With [[area]], [[name]]'s population density is [[populationDensity]]." & return after report
+end repeat
+put -
+put report
+
+put "End of Repeat Demo"

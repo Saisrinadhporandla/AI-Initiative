@@ -1,0 +1,102 @@
+﻿(****
+COMMONLY USED LINES IN FRAMEWORK :-
+the TextStyle : This function is used to configure properties for Optical Character Recognition (OCR) when the default settings struggle to accurately identify text.
+ErrorMessageCustomization.captureScreenAndNotifyError theException : This handler captures any exceptions that occur when the script fails, providing a user-friendly error message in the console and taking a snap of the failure.
+Params : This refers to the parameters or arguments that are passed to a function or script to customize its behavior or input data. These parameters allow users to specify different values or configurations for the automation tasks, enabling more flexible and reusable scripts
+****)
+
+(*
+This Handler helps to check the Status of Work Order(WO), Asset Service Note(ASN) and Service Note  
+*)
+to checkOpenWOAndCheckASNAndSNStatus
+	try
+		try
+			openAssetWorkOrder
+			"POM/AssetPage".changeStatusToClosed
+			wait 3
+		catch
+			log "No Open Work Orders for this Asset"
+		end try
+		"POM/LandingPage".searchForEggplantRegressionTestAsset
+		"POM/AssetPage".updateASNActionToAccepted
+		"POM/AssetPage".validateSNStatusToActive
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end checkOpenWOAndCheckASNAndSNStatus
+
+(*
+This Handler helps to open the Work Order in the Asset Page
+*)
+to openAssetWorkOrder
+	KeyHandlers.validateValues "Asset Open WorkOrder","leftPanel",5
+	KeyHandlers.clickInsideElement "has an open WorkOrder","leftPanel",[100,0]
+	try
+		KeyHandlers.validateValues "Work Order Number","leftPanel",10
+	catch
+		KeyHandlers.clickElement "Work Order",KeyHandlers.generateSRForLabel("Work Order",[-10,20,500,500],"bottomHalf")
+		KeyHandlers.validateValues "Work Order Number","leftPanel"
+	end try
+	put KeyHandlers.readField("Work Order Number",[60,0],"leftPanel") into universal workOrderNumber
+end openAssetWorkOrder
+(*
+This Handler helps to change the Status of the Work Order to Closed
+*)
+to changeStatusToClosed
+	try
+		set workOrderPortion to KeyHandlers.generateSRForLabel("Activity",[-30,20,700,500],"bottomHalf")
+		KeyHandlers.mouseActionOnPreferredElement "Status",workOrderPortion,,DoubleClick
+		wait 3
+		KeyHandlers.clickElement "Status",workOrderPortion
+		#Changing the Status of the work Order to Closed 
+		KeyHandlers.clickElement "Closed",workOrderPortion
+		KeyHandlers.clickElement "Save",(KeyHandlers.generateSRForLabel("Cancel","leftHalf","bottomHalf"))
+		KeyHandlers.validateValues "Closed","leftPanel"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try	
+end changeStatusToClosed
+(*
+This Handler helps to change the Activity Asset Serivce Note (ASN) to Accpted
+*)
+to updateASNActionToAccepted
+	try
+		KeyHandlers.scrollTo "TestSNote","footerSection",,1
+		wait 2
+		#Checking the Activity Of ASn is in Accepted or not 
+		try
+			KeyHandlers.validateValues "Accepted",(KeyHandlers.generateSRForLabel("TestSNote","topHalf",KeyHandlers.generateSRForLabel("Asset Service Notes","topHalf","rightPanel"))),5
+		catch
+			# if ASN action is not accepted Need to change
+			KeyHandlers.clickElement "workOrder/icons/moduleDropdown",(KeyHandlers.generateSRForLabel("TestSNote","topHalf",KeyHandlers.generateSRForLabel("Asset Service Notes","topHalf","rightPanel")))
+			KeyHandlers.clickElement "Edit","rightPanel"
+			KeyHandlers.validateValues "Required Information","rightHalf"
+			KeyHandlers.dropDown "Action","Accepted",KeyHandlers.generateSRForLabel("Action","topHalf","rightHalf"),(Sections().offset().nullOffset)
+			set the TextStyle to {contrast:"On", contrastColor:"#0075D6", contrastTolerance:"45"}
+			KeyHandlers.clickElement "Save","bottomHalf"
+			set the TextStyle to empty
+		end try
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end updateASNActionToAccepted
+
+(*
+This Handler helps to validate the Status of the Service Note Status 
+*)
+to validateSNStatusToActive
+	try
+		KeyHandlers.clickElement "TestSNote",(KeyHandlers.generateSRForLabel("TestSNote","topHalf",KeyHandlers.generateSRForLabel("Asset Service Notes","topHalf","rightPanel")))
+		KeyHandlers.validateValues "Service Note Information","leftPanel"
+		KeyHandlers.validateField "Status","Active",[100,0],"leftPanel"
+	Catch theException
+		ErrorMessageCustomization.captureScreenAndNotifyError theException
+	End Try
+end validateSNStatusToActive
+
+
+
+
+
+
+
